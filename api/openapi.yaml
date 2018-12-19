@@ -1,0 +1,29 @@
+openapi: 3.0.0
+info:
+  license:
+    name: ISC
+  title: OurGroceries REST API
+  version: v1
+servers:
+  - url: 'http://ourgroceries-rest-api/v1'
+paths:
+  /version:
+    get:
+      operationId: getVersion
+      responses:
+        '200':
+          description: Get the version of the service
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
+components:
+  schemas:
+    Version:
+      properties:
+        version:
+          type: string
+          example: '1'
+        build:
+          type: string
+          example: '2018-12-18T23:53Z'
