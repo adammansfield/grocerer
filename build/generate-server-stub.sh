@@ -10,7 +10,7 @@ if ! command -v python > /dev/null; then
   sudo apt install python-minimal
 fi
 
-if ! command -v openapi-generator > /dev/null; then
+if ! command -v openapi-generator-cli > /dev/null; then
   openApiGeneratorDir=./openapi-generator
   if [[ ! -d $openApiGeneratorDir ]]; then
     mkdir $openApiGeneratorDir
@@ -20,4 +20,7 @@ if ! command -v openapi-generator > /dev/null; then
   export PATH=$PATH:$openApiGeneratorDir
 fi
 
-openapi-generator-cli version
+openapi-generator-cli generate \
+  -i ../api/openapi.yaml \
+  -g go-server \
+  -o generated/server-stub
