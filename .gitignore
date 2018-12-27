@@ -1,2 +1,2 @@
-!build/
-build/openapi-generator
+api/gen
+api/openapi-generator

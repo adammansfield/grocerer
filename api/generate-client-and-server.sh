@@ -20,7 +20,7 @@ if ! command -v openapi-generator-cli > /dev/null; then
   export PATH=$PATH:$openApiGeneratorDir
 fi
 
-openapi-generator-cli generate \
-  -i ../api/openapi.yaml \
-  -g go-server \
-  -o generated/server-stub
+openApiSpec=./openapi.yaml
+outputDirectory=./gen
+openapi-generator-cli generate -i $openApiSpec -o $outputDirectory/clients/go -l go
+openapi-generator-cli generate -i $openApiSpec -o $outputDirectory/servers/go -g go-server
