@@ -24,3 +24,5 @@ openApiSpec=./openapi.yaml
 outputDirectory=./gen
 openapi-generator-cli generate -i $openApiSpec -o $outputDirectory/clients/go -l go
 openapi-generator-cli generate -i $openApiSpec -o $outputDirectory/servers/go -g go-server
+
+cp -r $outputDirectory/servers/go ../internal
