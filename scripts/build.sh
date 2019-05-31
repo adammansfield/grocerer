@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
-echo $PWD
-go get -d -v internal/...
-go build -a -installsuffix cgo -o ./bin/openapi ./internal/.
+declare -r scriptDir=$(dirname "$(readlink -f "$0")")
+declare -r projectDir=$(readlink -f "$scriptDir/..")
+go get -d -v "$projectDir/internal/..."
+go build -a -installsuffix cgo -o "$projectDir/bin/openapi" "$projectDir/internal/."
