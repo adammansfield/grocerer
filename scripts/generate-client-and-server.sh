@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 main() {
-  local -r projectDir=..
+  local -r scriptDir=$(dirname "$(readlink -f "$0")")
+  local -r projectDir=$(readlink -f "$scriptDir/..")
   local -r openApiSpec=$projectDir/api/openapi.yaml
   local -r outputDirectory=$projectDir/gen
 
