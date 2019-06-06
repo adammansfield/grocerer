@@ -46,17 +46,15 @@ get_openapi_generator() {
 
 install_dependencies() {
   dependencies=""
-  #if ! command -v jq > /dev/null; then
+  if ! command -v jq > /dev/null; then
     dependencies+="jq "
-  #fi
-  #if ! command -v mvn > /dev/null; then
+  fi
+  if ! command -v mvn > /dev/null; then
     dependencies+="maven "
-  #fi
-  #if ! command -v python > /dev/null; then
+  fi
+  if ! command -v python > /dev/null; then
     dependencies+="python-minimal "
-  #fi
-
-  echo "dependencies=$dependencies"
+  fi
 
   if [ -z "$dependencies" ]; then
     return
