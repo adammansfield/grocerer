@@ -6,8 +6,16 @@ main() {
   local -r openApiSpec="$projectDir/api/openapi.yaml"
   local -r outputDirectory="$projectDir/gen"
 
+  echo "Installing dependencies..."
+  install_dependencies
+
+  echo "Getting openapi-generator-cli..."
   get_openapi_generator "$projectDir/gen/openapi-generator"
+
+  echo "Generating client..."
   generate_client $openApiSpec $outputDirectory
+
+  echo "Generating server..."
   generate_server $openApiSpec $outputDirectory
 }
 
@@ -34,6 +42,33 @@ get_openapi_generator() {
     chmod u+x $openApiGeneratorDir/openapi-generator-cli
     export PATH=$PATH:$openApiGeneratorDir
   fi
+}
+
+install_dependencies() {
+  dependencies=""
+  #if ! command -v jq > /dev/null; then
+    dependencies+="jq "
+  #fi
+  #if ! command -v mvn > /dev/null; then
+    dependencies+="maven "
+  #fi
+  #if ! command -v python > /dev/null; then
+    dependencies+="python-minimal "
+  #fi
+
+  echo "dependencies=$dependencies"
+
+  if [ -z "$dependencies" ]; then
+    return
+  fi
+
+  if [ $(id -u) = 0 ]; then
+    aptCommand="apt"
+  else
+    aptCommand="sudo apt"
+  fi
+  $aptCommand update -qq
+  $aptCommand install -y $dependencies
 }
 
 main "$@"
