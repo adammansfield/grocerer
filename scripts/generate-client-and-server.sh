@@ -10,7 +10,7 @@ main() {
   install_dependencies
 
   echo "Getting openapi-generator-cli..."
-  get_openapi_generator "$projectDir/gen/openapi-generator"
+  get_openapi_generator "$projectDir/tools/openapi-generator"
 
   echo "Generating client..."
   generate_client "$openApiSpec" "$outputDir"
@@ -25,7 +25,11 @@ main() {
 integrate_server_stub() {
   local -r serverStubDir=$1
   local -r internalDir=$2
-  cp -r $serverStubDir $internalDir
+  rsync -av --progress "$serverStubDir/" "$internalDir" \
+    --exclude .openapi-generator \
+    --exclude .openapi-generator-ignore \
+    --exclude api \
+    --exclude README.md
 }
 
 generate_client() {
@@ -41,14 +45,14 @@ generate_server_stub() {
 }
 
 get_openapi_generator() {
-  local -r directory="$projectDir/gen/openapi-generator"
+  local -r directory=$1
   local -r filename="openapi-generator-cli"
   if ! command -v $filename > /dev/null; then
     if [[ ! -d "$directory" ]]; then
       mkdir -p "$directory"
     fi
     if [[ ! -f "$directory/$filename" ]]; then
-      echo "Downloading $filename"
+      echo "Downloading $filename..."
       curl -s https://raw.githubusercontent.com/OpenAPITools/openapi-generator/master/bin/utils/openapi-generator-cli.sh > "$directory/openapi-generator-cli"
       chmod u+x "$directory/openapi-generator-cli"
     fi
@@ -66,6 +70,9 @@ install_dependencies() {
   fi
   if ! command -v python > /dev/null; then
     dependencies+="python-minimal "
+  fi
+  if ! command -v rsync > /dev/null; then
+    dependencies+="rsync "
   fi
 
   if [ -z "$dependencies" ]; then
