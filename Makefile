@@ -20,15 +20,7 @@ build-nc: gen ## Build the container without caching
 
 .PHONY: clean
 clean: ## Clean the output and generated files
-	rm -fr ./bin/
-	rm -fr ./gen/
-	rm -fr ./tools/openapi-generator/
-	rm -f ./internal/go/logger.go
-	rm -f ./internal/go/model_version.go
-	rm -f ./internal/go/routers.go
-	rm -f ./internal/Dockerfile
-	rm -f ./internal/main.go
-	if [ -d tools/ ]; then rmdir tools/; fi
+	./scripts/clean.py
 
 .PHONY: help
 help:
