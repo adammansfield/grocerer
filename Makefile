@@ -4,9 +4,11 @@ DOCKERFILE_DIRECTORY := ./internal
 HOST_PORT := 1200
 
 ifeq ($(OS),Windows_NT)
-	GO_FILES:=
+	GO_FILES :=
+	PYTHON3 := python
 else
-	GO_FILES:=$(shell find internal/ -type f -name '*.go')
+	GO_FILES := $(shell find internal/ -type f -name '*.go')
+	PYTHON3 := /usr/bin/env python3
 endif
 
 
@@ -20,7 +22,7 @@ build-nc: gen ## Build the container without caching
 
 .PHONY: clean
 clean: ## Clean the output and generated files
-	./scripts/clean.py
+	$(PYTHON3) ./scripts/clean.py
 
 .PHONY: help
 help:
