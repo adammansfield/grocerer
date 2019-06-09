@@ -47,3 +47,8 @@ bin/openapi: $(GO_FILES)
 
 gen: api/openapi.yaml
 	./scripts/generate-client-and-server.sh
+	# TODO: When Dockefile.generate and extract-from-docker-image.py is ready, replace above with:
+	#docker build -t $(APP_NAME)-generate -f build/package/Dockerfile.package .
+	#./scripts/extract-from-docker-image.py $(APP_NAME) "gen/clients/go"
+	#./scripts/extract-from-docker-image.py $(APP_NAME) "gen/servers/go"
+	#./scripts/integrate-generated-server.py "gen/servers/go" "internal"

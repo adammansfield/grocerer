@@ -1,0 +1,9 @@
+FROM alpine
+
+RUN apk update
+RUN apk add bash curl jq maven
+RUN rm -rf /var/cache/apk/*
+
+COPY api/openapi.yaml .
+COPY scripts/generate-client-and-server.docker.sh .
+RUN ./generate-client-and-server.docker.sh
