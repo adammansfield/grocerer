@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+"""Cross-platform script for this project's `make clean`"""
+
 import pathlib
 import shutil
 
