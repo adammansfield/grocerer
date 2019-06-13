@@ -1,35 +1,17 @@
 #!/usr/bin/env bash
 
 main() {
-  local -r scriptDir=$(dirname "$(readlink -f "$0")")
-  local -r projectDir=$(readlink -f "$scriptDir/..")
-  local -r openApiSpec="$projectDir/api/openapi.yaml"
-  local -r outputDir="$projectDir/gen"
-
-  echo "Installing dependencies..."
-  install_dependencies
+  local -r openApiSpec="openapi.yaml"
+  local -r outputDir="gen"
 
   echo "Getting openapi-generator-cli..."
-  get_openapi_generator "$projectDir/tools/openapi-generator"
+  get_openapi_generator "openapi-generator"
 
   echo "Generating client..."
   generate_client "$openApiSpec" "$outputDir"
 
   echo "Generating server stub..."
   generate_server_stub "$openApiSpec" "$outputDir"
-
-  echo "Integrating server stub with existing code..."
-  integrate_server_stub "$outputDir/servers/go" "$projectDir/internal"
-}
-
-integrate_server_stub() {
-  local -r serverStubDir=$1
-  local -r internalDir=$2
-  rsync -av --progress "$serverStubDir/" "$internalDir" \
-    --exclude .openapi-generator \
-    --exclude .openapi-generator-ignore \
-    --exclude api \
-    --exclude README.md
 }
 
 generate_client() {
@@ -58,34 +40,6 @@ get_openapi_generator() {
     fi
     export PATH=$PATH:$directory
   fi
-}
-
-install_dependencies() {
-  dependencies=""
-  if ! command -v jq > /dev/null; then
-    dependencies+="jq "
-  fi
-  if ! command -v mvn > /dev/null; then
-    dependencies+="maven "
-  fi
-  if ! command -v python > /dev/null; then
-    dependencies+="python-minimal "
-  fi
-  if ! command -v rsync > /dev/null; then
-    dependencies+="rsync "
-  fi
-
-  if [ -z "$dependencies" ]; then
-    return
-  fi
-
-  if [ $(id -u) = 0 ]; then
-    aptCommand="apt"
-  else
-    aptCommand="sudo apt"
-  fi
-  $aptCommand update -qq
-  $aptCommand install -y $dependencies
 }
 
 main "$@"
