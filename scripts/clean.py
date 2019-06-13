@@ -16,8 +16,15 @@ def main():
     cleaner.remove_file("internal/main.go")
     cleaner.remove_directory("bin")
     cleaner.remove_directory("gen")
-    cleaner.remove_directory("tools/openapi-generator")
-    cleaner.remove_empty_directory("tools")
+
+    # TODO: remove below when integrate_server_stub.py is done
+    cleaner.remove_file("internal/go/api_default.go")
+    cleaner.remove_file("internal/.openapi-generator-ignore")
+    cleaner.remove_file("internal/README.md")
+    cleaner.remove_directory("internal/.openapi-generator")
+    cleaner.remove_directory("internal/api")
+    cleaner.remove_empty_directory("internal/go")
+    cleaner.remove_empty_directory("internal")
 
 class ProjectCleaner:
     def __init__(self, project_directory):

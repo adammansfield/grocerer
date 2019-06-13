@@ -4,19 +4,23 @@ HOST_PORT ?= 1200
 OUTPUT := bin/openapi
 
 ifeq ($(OS),Windows_NT)
+	COMMENT := @REM
 	GO_FILES :=
 	PYTHON3 := python
+	SEP := \\# TODO: Remove when integrate_server_stub.py is done
 else
+	COMMENT := @\#
 	GO_FILES := $(shell find internal/ -type f -name '*.go')
 	PYTHON3 := /usr/bin/env python3
+	SEP := /# TODO: Remove when integrate_server_stub.py is done
 endif
 EXTRACT := $(PYTHON3) scripts/extract.py
 
 define build_image
-	docker build $(1) -t $(APP_NAME) internal/
+	docker build $(1) -t $(APP_NAME) internal
 	$(EXTRACT) $(APP_NAME) openapi $(OUTPUT)
-	@# Update the target's timestamp so it is newer than its prerequisites.
-	@# This will ensure that make will not unnecessarily rebuild.
+	$(COMMENT) Update the target's timestamp so it is newer than its prerequisites.
+	$(COMMENT) This will ensure that make will not unnecessarily rebuild.
 	$(PYTHON3) scripts/touch.py $(OUTPUT)
 endef
 
@@ -55,9 +59,12 @@ bin:
 	mkdir bin
 
 gen: api/openapi.yaml
-	scripts/generate-client-and-server.sh
-	# TODO: When Dockefile.generate and extract-from-docker-image.py is ready, replace above with:
-	#docker build -t $(APP_NAME)-generate -f build/package/Dockerfile.package .
-	#./scripts/extract-from-docker-image.py $(APP_NAME) "gen/clients/go"
-	#./scripts/extract-from-docker-image.py $(APP_NAME) "gen/servers/go"
-	#./scripts/integrate-generated-server.py "gen/servers/go" "internal"
+	docker build -t $(APP_NAME)-generate -f build/package/Dockerfile.generate .
+	$(COMMENT) # TODO: Replace mkdir with mkdir.py
+	mkdir gen
+	mkdir gen$(SEP)clients
+	mkdir gen$(SEP)servers
+	$(EXTRACT) $(APP_NAME)-generate gen/clients/go gen/clients/go
+	$(EXTRACT) $(APP_NAME)-generate gen/servers/go gen/servers/go
+	$(COMMENT) # TODO: Replace extract with $(PYTHON3) scripts/integrate_server_stub.py gen/servers/go internal
+	$(EXTRACT) $(APP_NAME)-generate gen/servers/go internal
