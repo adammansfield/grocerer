@@ -5,14 +5,24 @@ OUTPUT := bin/openapi
 
 ifeq ($(OS),Windows_NT)
 	COMMENT := @REM
-	GO_FILES :=
 	PYTHON3 := python
-	SEP := \\# TODO: Remove when integrate_server_stub.py is done
+
+	# TODO: Remove when integrate_server_stub.py is done
+	CP := xcopy /s
+	RM := del
+	SEP := \\
+
+	# TODO: Replace with find.py
+	GO_FILES := internal$(SEP)go$(SEP)api.go
 else
 	COMMENT := @\#
 	GO_FILES := $(shell find internal/ -type f -name '*.go')
 	PYTHON3 := /usr/bin/env python3
-	SEP := /# TODO: Remove when integrate_server_stub.py is done
+
+	# TODO: Remove when integrate_server_stub.py is done
+	CP := cp -r --no-target-directory
+	RM := rm -f
+	SEP := /
 endif
 EXTRACT := $(PYTHON3) scripts/extract.py
 
@@ -67,4 +77,5 @@ gen: api/openapi.yaml
 	$(EXTRACT) $(APP_NAME)-generate gen/clients/go gen/clients/go
 	$(EXTRACT) $(APP_NAME)-generate gen/servers/go gen/servers/go
 	$(COMMENT) # TODO: Replace extract with $(PYTHON3) scripts/integrate_server_stub.py gen/servers/go internal
-	$(EXTRACT) $(APP_NAME)-generate gen/servers/go internal
+	$(CP) gen$(SEP)servers$(SEP)go internal
+	$(RM) internal$(SEP)go$(SEP)api_default.go
