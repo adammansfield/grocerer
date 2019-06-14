@@ -1,3 +1,8 @@
 !build/
 bin/
 gen/
+internal/go/logger.go
+internal/go/model_*.go
+internal/go/routers.go
+internal/Dockerfile
+internal/main.go

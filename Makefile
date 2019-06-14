@@ -70,12 +70,7 @@ bin:
 
 gen: api/openapi.yaml
 	docker build -t $(APP_NAME)-generate -f build/package/Dockerfile.generate .
-	$(COMMENT) # TODO: Replace mkdir with mkdir.py
-	mkdir gen
-	mkdir gen$(SEP)clients
-	mkdir gen$(SEP)servers
-	$(EXTRACT) $(APP_NAME)-generate gen/clients/go gen/clients/go
-	$(EXTRACT) $(APP_NAME)-generate gen/servers/go gen/servers/go
-	$(COMMENT) # TODO: Replace extract with $(PYTHON3) scripts/integrate_server_stub.py gen/servers/go internal
+	$(EXTRACT) $(APP_NAME)-generate /gen gen
+	$(COMMENT) # TODO: Replace below with $(PYTHON3) scripts/integrate_server_stub.py gen/servers/go internal
 	$(CP) gen$(SEP)servers$(SEP)go internal
 	$(RM) internal$(SEP)go$(SEP)api_default.go

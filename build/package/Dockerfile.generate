@@ -1,10 +1,6 @@
-FROM alpine
+FROM openapitools/openapi-generator-cli
 
-RUN apk update
-RUN apk add bash curl jq maven
-RUN rm -rf /var/cache/apk/*
-
+WORKDIR /gen
 COPY api/openapi.yaml .
-COPY scripts/generate-client-and-server.sh .
-RUN ["chmod", "+x", "generate-client-and-server.sh"]
-RUN ["./generate-client-and-server.sh"]
+RUN ["/usr/local/bin/docker-entrypoint.sh", "generate", "-i", "openapi.yaml", "-o", "clients/go", "-g", "go"]
+RUN ["/usr/local/bin/docker-entrypoint.sh", "generate", "-i", "openapi.yaml", "-o", "servers/go", "-g", "go-server"]
