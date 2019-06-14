@@ -1,0 +1,9 @@
+FROM golang:1.10
+
+WORKDIR /go/src
+COPY internal/go ./go
+COPY internal/main.go .
+
+ENV CGO_ENABLED=0
+RUN go get -d -v ./...
+RUN go test -v ./go/...

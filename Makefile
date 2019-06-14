@@ -59,6 +59,10 @@ stop: ## Stop and remove a running container
 	docker stop $(APP_NAME)
 	docker rm $(APP_NAME)
 
+.PHONY: test
+test: gen
+	docker build -t $(APP_NAME)-test -f build/package/Dockerfile.test .
+
 .PHONY: up
 up: build run ## Build and run the container
 

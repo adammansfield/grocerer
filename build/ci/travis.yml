@@ -4,5 +4,9 @@ language: minimal
 services:
     - docker
 
-script:
-    - make build
+jobs:
+  include:
+    - stage: build
+      script: make build
+    - stage: tests
+      script: make test
