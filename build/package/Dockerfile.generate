@@ -6,4 +6,5 @@ RUN rm -rf /var/cache/apk/*
 
 COPY api/openapi.yaml .
 COPY scripts/generate-client-and-server.sh .
-RUN ./generate-client-and-server.sh
+RUN ["chmod", "+x", "generate-client-and-server.sh"]
+RUN ["./generate-client-and-server.sh"]

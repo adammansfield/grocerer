@@ -1,4 +1,5 @@
 # OurGroceries REST API
+[![Build Status](https://api.travis-ci.org/adammansfield/ourgroceries-rest-api.svg?branch=master)](https://travis-ci.org/adammansfield/ourgroceries-rest-api)
 
 # Prerequisites
 - docker
