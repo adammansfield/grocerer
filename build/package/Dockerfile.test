@@ -1,8 +1,7 @@
 FROM golang:1.10
 
 WORKDIR /go/src
-COPY internal/go ./go
-COPY internal/main.go .
+COPY internal .
 
 ENV CGO_ENABLED=0
 RUN go get -d -v ./...
