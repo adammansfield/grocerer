@@ -60,11 +60,11 @@ stop: ## Stop and remove a running container
 	docker rm $(APP_NAME)
 
 .PHONY: test
-test: gen
+test: gen ## Run the tests
 	docker build -t $(APP_NAME)-test -f build/package/Dockerfile.test .
 
 .PHONY: up
-up: build run ## Build and run the container
+up: build test run ## Build, test, and run the container
 
 $(OUTPUT): $(GO_FILES) bin
 	$(call build_image)
