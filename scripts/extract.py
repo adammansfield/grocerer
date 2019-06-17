@@ -7,15 +7,7 @@ import subprocess
 import sys
 
 def main():
-    if len(sys.argv) != 4:
-        script_filename = pathlib.Path(__file__).resolve().name
-        print("USAGE: {} <docker_image> <source> <destination>".format(script_filename))
-        sys.exit()
-
-    docker_image = sys.argv[1]
-    source = sys.argv[2]
-    destination = sys.argv[3]
-
+    docker_image, source, destination = parse_args()
     container = docker_create(docker_image)
     docker_cp(container, source, destination)
     docker_rm(container)
@@ -38,5 +30,16 @@ def docker_rm(container):
             ['docker', 'rm', container],
             stdout=subprocess.DEVNULL)
     result.check_returncode()
+
+def parse_args():
+    if len(sys.argv) != 4:
+        script_filename = pathlib.Path(__file__).resolve().name
+        print("USAGE: {} <docker_image> <source> <destination>".format(script_filename))
+        sys.exit()
+
+    docker_image = sys.argv[1]
+    source = sys.argv[2]
+    destination = sys.argv[3]
+    return (docker_image, source, destination)
 
 main()
