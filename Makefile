@@ -11,12 +11,8 @@ ifeq ($(OS),Windows_NT)
 	CP := xcopy /s
 	RM := del
 	SEP := \\
-
-	# TODO: Replace with find.py
-	GO_FILES := internal$(SEP)go$(SEP)api.go
 else
 	COMMENT := @\#
-	GO_FILES := $(shell find internal/ -type f -name '*.go')
 	PYTHON3 := /usr/bin/env python3
 
 	# TODO: Remove when integrate_server_stub.py is done
@@ -25,6 +21,7 @@ else
 	SEP := /
 endif
 EXTRACT := $(PYTHON3) scripts/extract.py
+GO_FILES := $(shell $(PYTHON3) scripts/find.py internal '*.go')
 
 define build_image
 	docker build $(1) -t $(APP_NAME) internal
