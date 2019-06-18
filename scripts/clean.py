@@ -18,7 +18,7 @@ def main():
     cleaner.remove_directory("bin")
     cleaner.remove_directory("gen")
 
-    # TODO: remove below when integrate_server_stub.py is done
+    # TODO: remove below when openapi-generator is removed
     cleaner.remove_file("internal/go/api_default.go")
     cleaner.remove_file("internal/.openapi-generator-ignore")
     cleaner.remove_file("internal/README.md")
