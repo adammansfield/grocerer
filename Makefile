@@ -22,6 +22,7 @@ else
 endif
 EXTRACT := $(PYTHON3) scripts/extract.py
 GO_FILES := $(shell $(PYTHON3) scripts/find.py internal '*.go')
+VERSION_FILE := internal/go/version.go
 
 define build_image
 	docker build $(1) -t $(APP_NAME) internal
@@ -35,7 +36,7 @@ endef
 build: gen $(OUTPUT) ## Build the container
 
 .PHONY: build-nc
-build-nc: gen bin ## Build the container without caching
+build-nc: gen $(VERSION_FILE) bin ## Build the container without caching
 	$(call build_image,--no-cache)
 
 .PHONY: clean
@@ -57,13 +58,13 @@ stop: ## Stop and remove a running container
 	docker rm $(APP_NAME)
 
 .PHONY: test
-test: gen ## Run the tests
+test: gen $(VERSION_FILE) ## Run the tests
 	docker build -t $(APP_NAME)-test -f build/package/Dockerfile.test .
 
 .PHONY: up
 up: build test run ## Build, test, and run the container
 
-$(OUTPUT): $(GO_FILES) bin
+$(OUTPUT): $(GO_FILES) $(VERSION_FILE) bin
 	$(call build_image)
 
 bin:
@@ -75,3 +76,6 @@ gen: api/openapi.yaml
 	$(COMMENT) # TODO: Replace below with $(PYTHON3) scripts/integrate_server_stub.py gen/servers/go internal
 	$(CP) gen$(SEP)servers$(SEP)go internal
 	$(RM) internal$(SEP)go$(SEP)api_default.go
+
+$(VERSION_FILE): gen $(GO_FILES)
+	$(PYTHON3) scripts/version.py

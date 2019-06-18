@@ -32,5 +32,5 @@ func TestGetVersionBody(t *testing.T) {
 
 	actual := Version{}
 	json.Unmarshal(body, &actual)
-	equals(t, Version{APIVersion, BuildDate}, actual)
+	equals(t, PackageVersion, actual)
 }

@@ -12,6 +12,7 @@ def main():
     cleaner.remove_file("internal/go/logger.go")
     cleaner.remove_file("internal/go/model_version.go")
     cleaner.remove_file("internal/go/routers.go")
+    cleaner.remove_file("internal/go/version.go")
     cleaner.remove_file("internal/Dockerfile")
     cleaner.remove_file("internal/main.go")
     cleaner.remove_directory("bin")

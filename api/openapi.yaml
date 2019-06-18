@@ -21,9 +21,12 @@ components:
   schemas:
     Version:
       properties:
-        version:
+        api:
+          type: integer
+          example: 1
+        commit:
           type: string
-          example: '1'
-        build:
+          example: '423322c'
+        date:
           type: string
-          example: '2018-12-18T23:53Z'
+          example: '2019-06-17T21:05Z'

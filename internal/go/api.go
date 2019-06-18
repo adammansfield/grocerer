@@ -9,11 +9,6 @@ import (
 )
 
 const (
-	// APIVersion is the version of the API
-	APIVersion = "1"
-	// BuildDate is the date of the build
-	BuildDate = "2019-06-14T12:23"
-
 	mainRawURL   = "https://www.ourgroceries.com"
 	signInRawURL = "https://www.ourgroceries.com/sign-in"
 	userAgent    = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.90 Safari/537.36"
@@ -61,6 +56,5 @@ func logIn() error {
 func GetVersion(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
-	v := Version{APIVersion, BuildDate}
-	json.NewEncoder(w).Encode(v)
+	json.NewEncoder(w).Encode(PackageVersion)
 }
