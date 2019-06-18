@@ -1,3 +1,5 @@
+// +build small_test
+
 package openapi
 
 import (

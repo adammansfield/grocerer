@@ -1,8 +1,9 @@
 FROM golang:1.10
 
+ARG tag
 WORKDIR /go/src
 COPY internal .
 
 ENV CGO_ENABLED=0
 RUN go get -d -v ./...
-RUN go test -v ./go/...
+RUN go test -v -tags=$tag ./go/...

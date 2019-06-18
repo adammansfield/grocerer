@@ -16,6 +16,10 @@ define build_image
 	$(TOUCH) $(output)
 endef
 
+define run_tests
+	docker build -t $(app)-test -f build/package/Dockerfile.test --build-arg tag=$(1) .
+endef
+
 .PHONY: build
 build: gen $(output) ## Build the container
 
@@ -42,8 +46,12 @@ stop: ## Stop and remove a running container
 	docker rm $(app)
 
 .PHONY: test
-test: gen $(version_file) ## Run the tests
-	docker build -t $(app)-test -f build/package/Dockerfile.test .
+test: gen $(version_file) ## Run the small (unit) tests
+	$(call run_tests,small_test)
+
+.PHONY: test-large
+test-large: gen $(version_file) ## Run the large (end-to-end) tests
+	$(call run_tests,large_test)
 
 .PHONY: up
 up: build test run ## Build, test, and run the container

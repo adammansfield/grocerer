@@ -9,11 +9,12 @@
 
 ## Make commands
 ```
-make build     Build the container
-make build-nc  Build the container without caching
-make clean     Remove the output and generated files
-make run       Run the container
-make stop      Stop and remove the running container
-make test      Run the tests
-make up        Build, test, and run the container
+make build       Build the container
+make build-nc    Build the container without caching
+make clean       Clean the output and generated files
+make run         Run the container
+make stop        Stop and remove a running container
+make test        Run the small (unit) tests
+make test-large  Run the large (end-to-end) tests
+make up          Build, test, and run the container
 ```
