@@ -3,10 +3,13 @@
 package openapi
 
 import (
-  "testing"
+	"testing"
 )
 
 func TestLogIn(t *testing.T) {
-  assert(t, container.Config != Config{}, "empty config")
-  ok(t, logIn())
+	assert(t, container.Config != Config{}, "empty config")
+
+	teamId, err := login()
+	ok(t, err)
+	assert(t, teamId != "", "teamId not found")
 }

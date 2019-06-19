@@ -23,8 +23,8 @@ func LoadConfig() (Config, error) {
 }
 
 // NewConfig creates a Config from a stream
-func NewConfig(handle io.Reader) (Config, error) {
-	decoder := json.NewDecoder(handle)
+func NewConfig(stream io.Reader) (Config, error) {
+	decoder := json.NewDecoder(stream)
 	config := Config{}
 	err := decoder.Decode(&config)
 	return config, err

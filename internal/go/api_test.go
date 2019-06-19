@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -15,6 +16,13 @@ func getVersionWithMocks() *http.Response {
 	request := httptest.NewRequest("GET", "/version", nil)
 	GetVersion(recorder, request)
 	return recorder.Result()
+}
+
+func TestExtractTeamId(t *testing.T) {
+	stream := strings.NewReader("var g_teamId = \"E0KAegvBF9SOQ78b9vhlYr\"")
+	teamID, err := extractTeamID(stream)
+	ok(t, err)
+	equals(t, "E0KAegvBF9SOQ78b9vhlYr", teamID)
 }
 
 func TestGetVersionStatus(t *testing.T) {
