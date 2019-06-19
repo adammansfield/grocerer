@@ -4,7 +4,7 @@ app := $(shell $(BASENAME) $(CURDIR))
 port ?= 1200
 
 output := bin/openapi
-src := $(shell $(FIND) internal '*.go')
+src := $(shell $(FIND) internal *.go version.go)
 version_file := internal/go/version.go
 
 # The output extracted from the docker image might have an older timestamp.
