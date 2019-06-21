@@ -3,13 +3,20 @@
 package openapi
 
 import (
+	"fmt"
 	"testing"
 )
 
-func TestLogIn(t *testing.T) {
+func TestGetLists(t *testing.T) {
 	assert(t, container.Config != Config{}, "empty config")
 
-	teamId, err := login()
+	teamID, err := login()
 	ok(t, err)
-	assert(t, teamId != "", "teamId not found")
+	assert(t, teamID != "", "teamID not found")
+	fmt.Printf("teamID: %v\n", teamID)
+
+	lists, err := getLists(teamID)
+	ok(t, err)
+	assert(t, len(lists) > 0, "lists not found")
+	fmt.Printf("lists: %+v\n", lists)
 }

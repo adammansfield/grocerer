@@ -1,6 +1,7 @@
 package openapi
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -12,9 +13,10 @@ import (
 )
 
 const (
-	mainRawURL   = "https://www.ourgroceries.com"
-	signInRawURL = "https://www.ourgroceries.com/sign-in"
-	userAgent    = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.90 Safari/537.36"
+	mainRawURL      = "https://www.ourgroceries.com"
+	signInRawURL    = "https://www.ourgroceries.com/sign-in"
+	yourListsRawURL = "https://www.ourgroceries.com/your-lists/"
+	userAgent       = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.90 Safari/537.36"
 )
 
 // login authenticates with OurGroceries and returns the user's teamId
@@ -69,6 +71,63 @@ func extractTeamID(stream io.Reader) (string, error) {
 		return "", fmt.Errorf("teamId not found in body")
 	}
 	return teamIds[1], nil
+}
+
+type command struct {
+	Command string `json:"command"`
+	TeamID  string `json:"teamId"`
+}
+
+type yourListsResponse struct {
+	ShoppingLists []List `json:"shoppingLists"`
+}
+
+// getLists gets the grocery lists from OurGroceries
+func getLists(teamID string) ([]List, error) {
+	getListsCommand := command{"getOverview", teamID}
+	body, err := json.Marshal(getListsCommand)
+	if err != nil {
+		return nil, err
+	}
+
+	request, err := http.NewRequest("POST", yourListsRawURL, bytes.NewReader(body))
+	if err != nil {
+		return nil, err
+	}
+	request.Header.Add("Accept", "application/json, text/javascript, */*")
+	request.Header.Add("Content-Type", "application/json; charset=UTF-8")
+	request.Header.Add("Host", "www.ourgroceries.com")
+	request.Header.Add("Origin", mainRawURL)
+	request.Header.Add("Referer", yourListsRawURL)
+	request.Header.Add("User-Agent", userAgent)
+	request.Header.Add("X-Requested-With", "XMLHttpRequest")
+
+	response, err := container.HTTPClient.Do(request)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code %d for %s", response.StatusCode, response.Request.URL.String())
+	}
+
+	bytes, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	if response.Header.Get("Content-Type") != "application/json; charset=UTF-8" {
+		return nil, fmt.Errorf("unxpected content type %s for %s", response.Header.Get("Content-Type"), response.Request.URL.String())
+	}
+
+	yourListsResponseJSON := yourListsResponse{}
+	err = json.Unmarshal(bytes, &yourListsResponseJSON)
+	if err != nil {
+		return nil, err
+	}
+
+	return yourListsResponseJSON.ShoppingLists, nil
 }
 
 // GetLists responsd with the grocery lists
