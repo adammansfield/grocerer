@@ -50,17 +50,17 @@ def get_diff_files(toplevel_dir: pathlib.Path) -> List[pathlib.Path]:
     return [toplevel_dir / f for f in files]
 
 def gofmt(files: List[pathlib.Path]) -> List[str]:
-    files_arg = ' '.join([str(f) for f in files])
+    files_arg = [str(f) for f in files]
     result = subprocess.run(
-            ['gofmt', '-l', '-s', files_arg],
+            ['gofmt', '-l', '-s'] + files_arg,
             check=True,
             stdout=subprocess.PIPE)
     return result.stdout.decode('utf-8').rstrip('\n').splitlines()
 
 def golint(files: List[pathlib.Path]) -> List[str]:
-    files_arg = ' '.join([str(f) for f in files])
+    files_arg = [str(f) for f in files]
     result = subprocess.run(
-            ['golint', files_arg],
+            ['golint'] + files_arg,
             check=True,
             stdout=subprocess.PIPE)
     return result.stdout.decode('utf-8').rstrip('\n').splitlines()
