@@ -28,7 +28,7 @@ build-nc: gen $(version_file) bin ## Build the container without caching
 	$(call build_image,--no-cache)
 
 .PHONY: clean
-clean: ## Clean the output and generated files
+clean: ## Clean the project
 	$(CLEAN)
 
 .PHONY: help
@@ -41,7 +41,7 @@ run: ## Run the container
 	docker run -i -t --rm -p=$(port):8080 --name="$(app)" $(app)
 
 .PHONY: stop
-stop: ## Stop and remove a running container
+stop: ## Stop and remove the running container
 	docker stop $(app)
 	docker rm $(app)
 
@@ -52,9 +52,6 @@ test: gen $(version_file) ## Run the small (unit) tests
 .PHONY: test-large
 test-large: gen $(version_file) ## Run the large (end-to-end) tests
 	$(call run_tests,large_test)
-
-.PHONY: up
-up: build test run ## Build, test, and run the container
 
 # Run `make <target> verbose=1` to echo every command
 ifndef verbose
