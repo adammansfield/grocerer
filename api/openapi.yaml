@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   license:
-    name: ISC
+    name: MIT
   title: OurGroceries REST API
   version: v1
 servers:
@@ -17,8 +17,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Version'
+  /lists:
+    get:
+      operationId: getLists
+      responses:
+        '200':
+          description: Get the lists
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/List'
 components:
   schemas:
+    List:
+      properties:
+        name:
+          type: string
+          example: "n8w1aAoqqURBrM2nUns6nQ"
+        id:
+          type: string
+          example: "The Shopping List"
     Version:
       properties:
         api:

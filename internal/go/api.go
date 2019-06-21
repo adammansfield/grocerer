@@ -71,6 +71,12 @@ func extractTeamID(stream io.Reader) (string, error) {
 	return teamIds[1], nil
 }
 
+// GetLists responsd with the grocery lists
+func GetLists(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+}
+
 // GetVersion responds with the API version and build date
 func GetVersion(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
