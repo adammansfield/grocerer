@@ -22,13 +22,13 @@ def get_pre_commit_symlink():
             stdout=subprocess.PIPE)
     git_directory = result.stdout.decode('utf-8').rstrip('\n')
     pre_commit_symlink = pathlib.Path(git_directory) / 'hooks' / 'pre-commit'
-    if (pre_commit_symlink.exists()):
+    if pre_commit_symlink.exists():
         print("ERROR: {} exists".format(pre_commit_symlink))
         sys.exit(1)
     return pre_commit_symlink
 
 def get_pre_commit_file():
-    scripts_directory = pathlib.Path(__file__).resolve().parent
-    return scripts_directory / 'pre-commit.py'
+    git_scripts_directory = pathlib.Path(__file__).resolve().parent
+    return git_scripts_directory / 'pre-commit.py'
 
 main()

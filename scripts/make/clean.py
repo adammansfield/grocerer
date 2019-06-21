@@ -6,7 +6,7 @@ import pathlib
 import shutil
 
 def main():
-    project_directory = pathlib.Path(__file__).resolve().parent.parent
+    project_directory = pathlib.Path(__file__).resolve().parent.parent.parent
 
     cleaner = ProjectCleaner(project_directory)
     cleaner.remove_file("internal/go/logger.go")

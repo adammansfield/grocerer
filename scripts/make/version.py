@@ -8,7 +8,7 @@ import subprocess
 import textwrap
 
 def main():
-    project_directory = pathlib.Path(__file__).resolve().parent.parent
+    project_directory = pathlib.Path(__file__).resolve().parent.parent.parent
     path = project_directory / "internal/go/version.go"
     if path.exists():
         pathlib.Path.unlink(path)

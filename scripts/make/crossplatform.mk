@@ -16,10 +16,10 @@ endif
 
 # Use uppercase to avoid naming conflicts.
 # e.g. $(shell $(basename) $(CURDIR)) would conflict with make's basename function.
-BASENAME := $(PYTHON3) scripts/basename.py
-CLEAN := $(PYTHON3) scripts/clean.py
-EXTRACT := $(PYTHON3) scripts/extract.py
-FIND := $(PYTHON3) scripts/find.py
-HELP := $(PYTHON3) scripts/help.py
-TOUCH := $(PYTHON3) scripts/touch.py
-VERSION := $(PYTHON3) scripts/version.py
+BASENAME := $(PYTHON3) scripts/make/basename.py
+CLEAN := $(PYTHON3) scripts/make/clean.py
+EXTRACT := $(PYTHON3) scripts/make/extract.py
+FIND := $(PYTHON3) scripts/make/find.py
+HELP := $(PYTHON3) scripts/make/help.py
+TOUCH := $(PYTHON3) scripts/make/touch.py
+VERSION := $(PYTHON3) scripts/make/version.py

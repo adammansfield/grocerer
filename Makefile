@@ -1,4 +1,4 @@
-include scripts/crossplatform.mk
+include scripts/make/crossplatform.mk
 
 app := $(shell $(BASENAME) $(CURDIR))
 port ?= 1200

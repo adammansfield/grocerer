@@ -20,7 +20,7 @@ import re
 
 def main():
     regex = r"^([a-zA-Z_-]+):.*##\s*(.+)$"
-    makefile = pathlib.Path(__file__).resolve().parent.parent / "Makefile"
+    makefile = pathlib.Path(__file__).resolve().parent.parent.parent / "Makefile"
     with open(str(makefile)) as stream:
         matches = re.findall(regex, stream.read(), re.MULTILINE)
 
