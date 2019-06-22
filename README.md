@@ -13,7 +13,7 @@ For building and running:
 For development:
 - go
 - golint
-- ./scripts/git/install-pre-commit.py
+- ./scripts/git/install-git-hooks.py
 
 ## Make commands
 ```
