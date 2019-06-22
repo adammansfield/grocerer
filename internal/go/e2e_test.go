@@ -10,13 +10,14 @@ import (
 func TestGetLists(t *testing.T) {
 	assert(t, container.Config != Config{}, "empty config")
 
-	teamID, err := login()
+	client := OGClient{}
+	err := client.Login()
 	ok(t, err)
-	assert(t, teamID != "", "teamID not found")
-	fmt.Printf("teamID: %v\n", teamID)
+	assert(t, client.TeamID != "", "teamID not found")
+	fmt.Printf("  teamID: %v\n", client.TeamID)
 
-	lists, err := getLists(teamID)
+	lists, err := client.GetLists()
 	ok(t, err)
 	assert(t, len(lists) > 0, "lists not found")
-	fmt.Printf("lists: %+v\n", lists)
+	fmt.Printf("  lists: %+v\n", lists)
 }
