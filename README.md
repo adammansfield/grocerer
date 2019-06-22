@@ -17,6 +17,7 @@ For development:
 
 ## Make commands
 ```
+make             # Print help
 make build       # Build the container
 make build-nc    # Build the container without caching
 make clean       # Clean the project
