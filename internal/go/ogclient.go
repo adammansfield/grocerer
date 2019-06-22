@@ -12,6 +12,14 @@ import (
 	"strings"
 )
 
+const (
+	host            = "www.ourgroceries.com"
+	mainRawURL      = "https://www.ourgroceries.com"
+	signInRawURL    = "https://www.ourgroceries.com/sign-in"
+	yourListsRawURL = "https://www.ourgroceries.com/your-lists/"
+	userAgent       = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.90 Safari/537.36"
+)
+
 var re = regexp.MustCompile(`g_teamId = "([A-Za-z0-9]*)"`)
 
 // OGClient is a client for OurGroceries
@@ -21,11 +29,34 @@ type OGClient struct {
 
 type command struct {
 	Command string `json:"command"`
+	ListID  string `json:"listId,omitempty"`
 	TeamID  string `json:"teamId"`
+	Value   string `json:"value,omitempty"`
 }
 
 type yourListsResponse struct {
 	ShoppingLists []List `json:"shoppingLists"`
+}
+
+func buildAddItemRequest(teamID string, listID string, item string) (*http.Request, error) {
+	body, err := json.Marshal(command{Command: "insertItem", ListID: listID, TeamID: teamID, Value: item})
+	if err != nil {
+		return nil, err
+	}
+
+	request, err := http.NewRequest("POST", yourListsRawURL, bytes.NewReader(body))
+	if err != nil {
+		return nil, err
+	}
+
+	request.Header.Add("Accept", "application/json, text/javascript, */*")
+	request.Header.Add("Content-Type", "application/json; charset=UTF-8")
+	request.Header.Add("Host", host)
+	request.Header.Add("Origin", mainRawURL)
+	request.Header.Add("Referer", yourListsRawURL)
+	request.Header.Add("User-Agent", userAgent)
+	request.Header.Add("X-Requested-With", "XMLHttpRequest")
+	return request, nil
 }
 
 func buildLoginRequest() (*http.Request, error) {
@@ -49,7 +80,7 @@ func buildLoginRequest() (*http.Request, error) {
 
 // buildListsRequest returns request for a secret get lists in JSON
 func buildListsRequest(teamID string) (*http.Request, error) {
-	body, err := json.Marshal(command{"getOverview", teamID})
+	body, err := json.Marshal(command{Command: "getOverview", TeamID: teamID})
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +92,7 @@ func buildListsRequest(teamID string) (*http.Request, error) {
 
 	request.Header.Add("Accept", "application/json, text/javascript, */*")
 	request.Header.Add("Content-Type", "application/json; charset=UTF-8")
-	request.Header.Add("Host", "www.ourgroceries.com")
+	request.Header.Add("Host", host)
 	request.Header.Add("Origin", mainRawURL)
 	request.Header.Add("Referer", yourListsRawURL)
 	request.Header.Add("User-Agent", userAgent)
@@ -147,4 +178,24 @@ func (client *OGClient) Login() error {
 
 	client.TeamID, err = extractTeamID(response.Body)
 	return err
+}
+
+// AddItem adds an item to the given list
+func (client *OGClient) AddItem(listID string, item string) error {
+	request, err := buildAddItemRequest(client.TeamID, listID, item)
+	if err != nil {
+		return err
+	}
+
+	response, err := container.HTTPClient.Do(request)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return fmt.Errorf("unexpected status code %d for %s", response.StatusCode, response.Request.URL.String())
+	}
+
+	return nil
 }

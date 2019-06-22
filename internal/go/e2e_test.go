@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestGetLists(t *testing.T) {
+func TestAddItem(t *testing.T) {
 	assert(t, container.Config != Config{}, "empty config")
 
 	client := OGClient{}
@@ -20,4 +20,9 @@ func TestGetLists(t *testing.T) {
 	ok(t, err)
 	assert(t, len(lists) > 0, "lists not found")
 	fmt.Printf("  lists: %+v\n", lists)
+
+	listID := lists[0].Id
+	err = client.AddItem(listID, "baby dill pickles")
+	ok(t, err)
+	fmt.Printf("  itemAdded: %v\n", "baby dill pickles")
 }
