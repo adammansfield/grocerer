@@ -37,12 +37,14 @@ help:
 .DEFAULT_GOAL := help
 
 .PHONY: lint
-lint: ## Run gofmt and golint
+lint: ## Run gofmt, golint, and go vet
 	@echo 'gofmt -s -w $$(non_gen_src)'
 	gofmt -s -l $(non_gen_src)
 	gofmt -s -w $(non_gen_src)
 	@echo 'golint $$(non_gen_src)'
 	golint $(non_gen_src)
+	@echo 'go vet ./internal/...'
+	go vet ./internal/...
 
 .PHONY: run
 run: ## Run the container

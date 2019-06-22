@@ -2,7 +2,7 @@
 [![Build Status](https://api.travis-ci.org/adammansfield/ourgroceries-rest-api.svg?branch=master)](https://travis-ci.org/adammansfield/ourgroceries-rest-api)
 [![Go Report Card](https://goreportcard.com/badge/github.com/adammansfield/ourgroceries-rest-api)](https://goreportcard.com/report/github.com/adammansfield/ourgroceries-rest-api)
 
-A RESTful API for [OurGroceries](https://www.ourgroceries.com/overview) 
+A RESTful API for [OurGroceries](https://www.ourgroceries.com/overview)
 
 ## Prerequisites
 For building and running:
@@ -21,7 +21,7 @@ make             # Print help
 make build       # Build the container
 make build-nc    # Build the container without caching
 make clean       # Clean the project
-make lint        # Run gofmt and golint
+make lint        # Run gofmt, golint, and go vet
 make run         # Run the container
 make stop        # Stop and remove the running container
 make test        # Run the small (unit) tests
