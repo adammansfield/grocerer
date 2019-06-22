@@ -6,15 +6,21 @@ include scripts/make/silent.mk
 app := $(shell $(BASENAME) $(CURDIR))
 port ?= 1200
 
-output := bin/openapi
+bin_dir := _bin
+gen_dir := _gen
+test_dir := _test
+
+output := $(bin_dir)/openapi
 src := $(shell $(FIND) internal *.go version.go)
+test_large_success := $(test_dir)/test_large_success
+test_small_success := $(test_dir)/test_small_success
 version_file := internal/go/version.go
 
 .PHONY: build
-build: gen $(output) ## Build the container
+build: $(gen_dir) $(output) ## Build the container
 
 .PHONY: build-nc
-build-nc: gen $(version_file) bin ## Build the container without caching
+build-nc: $(gen_dir) $(bin_dir) $(version_file) ## Build the container without caching
 	$(call build_image,--no-cache)
 
 .PHONY: clean
@@ -36,25 +42,34 @@ stop: ## Stop and remove the running container
 	docker rm $(app)
 
 .PHONY: test
-test: gen $(src) $(version_file) ## Run the small (unit) tests
-	$(call run_tests,small_test)
+test: $(test_small_success) ## Run the small (unit) tests
 
 .PHONY: test-large
-test-large: gen $(src) $(version_file) ## Run the large (end-to-end) tests
-	$(call run_tests,large_test)
+test-large: $(test_large_success) ## Run the large (end-to-end) tests
 
-$(output): $(src) $(version_file) bin
-	$(call build_image)
+$(bin_dir):
+	mkdir $@
 
-bin:
-	mkdir bin
-
-# TODO: Remove $(CP) and $(RM) commands when openapi-generator is removed
-gen: api/openapi.yaml
+# TODO: Remove $(gen_dir) target when openapi-generator is removed
+$(gen_dir): api/openapi.yaml
 	docker build -t $(app)-generate -f build/package/Dockerfile.generate .
-	$(EXTRACT) $(app)-generate /gen gen
-	$(CP) gen$(SEP)servers$(SEP)go internal
+	$(EXTRACT) $(app)-generate /gen $(gen_dir)
+	$(CP) $(gen_dir)$(SEP)servers$(SEP)go internal
 	$(RM) internal$(SEP)go$(SEP)api_default.go
 
-$(version_file): gen $(src)
+$(output): $(bin_dir) $(src) $(version_file)
+	$(call build_image)
+
+$(test_large_success): $(gen_dir) $(src) $(test_dir) $(version_file)
+	$(call run_tests,large_test)
+	$(TOUCH) $@
+
+$(test_small_success): $(gen_dir) $(src) $(test_dir) $(version_file)
+	$(call run_tests,small_test)
+	$(TOUCH) $@
+
+$(test_dir):
+	mkdir $@
+
+$(version_file): $(gen_dir) $(src)
 	$(VERSION)

@@ -1,10 +1,17 @@
 !build/
-bin/
-gen/
+_bin/
+_gen/
+_test/
+internal/go/version.go
+config.json
+
+# TODO: Remove below when openapi-generator is removed
+internal/.openapi-generator/
+internal/api/
 internal/go/logger.go
 internal/go/model_*.go
 internal/go/routers.go
-internal/go/version.go
+internal/.openapi-generator-ignore
 internal/Dockerfile
 internal/main.go
-config.json
+internal/README.md
