@@ -7,8 +7,12 @@ app := $(shell $(BASENAME) $(CURDIR))
 port ?= 1200
 
 bin_dir := _bin
+# TODO: Remove gen_dir when openapi-generator is removed
 gen_dir := _gen
 test_dir := _test
+
+# TODO: Remove non_gen_src when openapi-generator is removed
+non_gen_src:=$(shell find internal -name "*.go" ! -name logger.go ! -name main.go ! -name model_*.go ! -name routers.go)
 
 output := $(bin_dir)/openapi
 src := $(shell $(FIND) internal *.go version.go)
@@ -32,6 +36,14 @@ help:
 	$(HELP)
 .DEFAULT_GOAL := help
 
+.PHONY: lint
+lint: ## Run gofmt and golint
+	@echo 'gofmt -s -w $$(non_gen_src)'
+	gofmt -s -l $(non_gen_src)
+	gofmt -s -w $(non_gen_src)
+	@echo 'golint $$(non_gen_src)'
+	golint $(non_gen_src)
+
 .PHONY: run
 run: ## Run the container
 	docker run -i -t --rm -p=$(port):8080 --name="$(app)" $(app)
@@ -50,7 +62,6 @@ test-large: $(test_large_success) ## Run the large (end-to-end) tests
 $(bin_dir):
 	mkdir $@
 
-# TODO: Remove $(gen_dir) target when openapi-generator is removed
 $(gen_dir): api/openapi.yaml
 	docker build -t $(app)-generate -f build/package/Dockerfile.generate .
 	$(EXTRACT) $(app)-generate /gen $(gen_dir)
