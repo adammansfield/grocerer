@@ -1,4 +1,7 @@
+include scripts/make/build_image.mk
 include scripts/make/crossplatform.mk
+include scripts/make/run_tests.mk
+include scripts/make/silent.mk
 
 app := $(shell $(BASENAME) $(CURDIR))
 port ?= 1200
@@ -6,19 +9,6 @@ port ?= 1200
 output := bin/openapi
 src := $(shell $(FIND) internal *.go version.go)
 version_file := internal/go/version.go
-
-# The output extracted from the docker image might have an older timestamp.
-# So update the output's timestamp to ensure that it is newer than its prerequisites.
-# Then make will not unnecessarily rebuild.
-define build_image
-	docker build $(1) -t $(app) internal
-	$(EXTRACT) $(app) openapi $(output)
-	$(TOUCH) $(output)
-endef
-
-define run_tests
-	docker build -t $(app)-test -f build/package/Dockerfile.test --build-arg tag=$(1) .
-endef
 
 .PHONY: build
 build: gen $(output) ## Build the container
@@ -46,17 +36,12 @@ stop: ## Stop and remove the running container
 	docker rm $(app)
 
 .PHONY: test
-test: gen $(version_file) ## Run the small (unit) tests
+test: gen $(src) $(version_file) ## Run the small (unit) tests
 	$(call run_tests,small_test)
 
 .PHONY: test-large
-test-large: gen $(version_file) ## Run the large (end-to-end) tests
+test-large: gen $(src) $(version_file) ## Run the large (end-to-end) tests
 	$(call run_tests,large_test)
-
-# Run `make <target> verbose=1` to echo every command
-ifndef verbose
-MAKEFLAGS += --silent
-endif
 
 $(output): $(src) $(version_file) bin
 	$(call build_image)
