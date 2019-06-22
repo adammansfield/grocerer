@@ -7,28 +7,50 @@ info:
 servers:
   - url: 'http://ourgroceries-rest-api/v1'
 paths:
-  /version:
-    get:
-      operationId: getVersion
-      responses:
-        '200':
-          description: Get the version of the service
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Version'
   /lists:
     get:
       operationId: getLists
+      summary: Get the shopping lists
       responses:
         '200':
-          description: Get the lists
+          description: Successful operation
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/List'
+        '401':
+          description: Unauthorized
+  /lists/{listID}/items:
+    post:
+      operationId: addItem
+      summary: Add an item to a list
+      parameters:
+        - name: listID
+          in: path
+          description: ID of list to add to
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Item created
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+  /version:
+    get:
+      operationId: getVersion
+      summary: Get the version of the service
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
 components:
   schemas:
     List:
