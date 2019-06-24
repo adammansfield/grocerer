@@ -3,7 +3,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/adammansfield/grocerer)](https://goreportcard.com/report/github.com/adammansfield/grocerer)
 [![License](https://img.shields.io/github/license/adammansfield/grocerer.svg?style=flat-square)](https://github.com/adammansfield/grocerer/blob/master/LICENSE)
 
-A RESTful API for [![Ourgroceries Icon](https://www.ourgroceries.com/favicon.ico)OurGroceries](https://www.ourgroceries.com/overview)
+A RESTful API for <a href="https://www.ourgroceries.com"><img src="https://www.ourgroceries.com/static/images/header.png" width="auto" height="40px"/></a>
 
 ## Prerequisites
 For building and running:
