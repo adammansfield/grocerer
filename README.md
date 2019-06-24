@@ -1,8 +1,9 @@
-# OurGroceries API [![OurGroceries Icon](https://www.ourgroceries.com/favicon.ico)](https://www.ourgroceries.com/overview)
-[![Build Status](https://api.travis-ci.org/adammansfield/ourgroceries-rest-api.svg?branch=master)](https://travis-ci.org/adammansfield/ourgroceries-rest-api)
-[![Go Report Card](https://goreportcard.com/badge/github.com/adammansfield/ourgroceries-rest-api)](https://goreportcard.com/report/github.com/adammansfield/ourgroceries-rest-api)
+# grocerer
+[![Build Status](https://api.travis-ci.org/adammansfield/grocerer.svg?branch=master)](https://travis-ci.org/adammansfield/grocerer)
+[![Go Report Card](https://goreportcard.com/badge/github.com/adammansfield/grocerer)](https://goreportcard.com/report/github.com/adammansfield/grocerer)
+[![License](https://img.shields.io/github/license/adammansfield/grocerer.svg?style=flat-square)](https://github.com/adammansfield/grocerer/blob/master/LICENSE)
 
-A RESTful API for [OurGroceries](https://www.ourgroceries.com/overview)
+A RESTful API for [![Ourgroceries Icon](https://www.ourgroceries.com/favicon.ico)OurGroceries](https://www.ourgroceries.com/overview)
 
 ## Prerequisites
 For building and running:
