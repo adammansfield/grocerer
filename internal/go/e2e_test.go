@@ -22,7 +22,7 @@ func TestAddItem(t *testing.T) {
 	fmt.Printf("  lists: %+v\n", lists)
 
 	listID := lists[0].Id
-	err = client.AddItem(listID, "baby dill pickles")
+	err = client.AddItem(listID, "sardines")
 	ok(t, err)
-	fmt.Printf("  itemAdded: %v\n", "baby dill pickles")
+	fmt.Printf("  itemAdded: %v\n", "sardines")
 }

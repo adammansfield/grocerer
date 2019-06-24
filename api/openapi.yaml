@@ -33,6 +33,13 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        description: Item to add to the grocery list
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Item'
       responses:
         '201':
           description: Item created
@@ -53,6 +60,11 @@ paths:
                 $ref: '#/components/schemas/Version'
 components:
   schemas:
+    Item:
+      properties:
+        name:
+          type: string
+          example: "sardines"
     List:
       properties:
         name:
