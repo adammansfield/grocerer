@@ -21,7 +21,6 @@ def main():
     cleaner.remove_file("internal/go/model_version.go")
     cleaner.remove_file("internal/go/routers.go")
     cleaner.remove_file("internal/.openapi-generator-ignore")
-    cleaner.remove_file("internal/Dockerfile")
     cleaner.remove_file("internal/main.go")
     cleaner.remove_file("internal/README.md")
     cleaner.remove_directory("internal/.openapi-generator")

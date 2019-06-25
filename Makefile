@@ -67,7 +67,8 @@ $(bin_dir):
 $(gen_dir): api/openapi.yaml
 	docker build -t $(app)-generate -f build/package/Dockerfile.generate .
 	$(EXTRACT) $(app)-generate /gen $(gen_dir)
-	$(CP) $(gen_dir)$(SEP)servers$(SEP)go internal
+	$(CP) $(gen_dir)$(SEP)servers$(SEP)go/go internal/go
+	$(CP) $(gen_dir)$(SEP)servers$(SEP)go/main.go internal/main.go
 	$(RM) internal$(SEP)go$(SEP)api_default.go
 
 $(output): $(bin_dir) $(src) $(version_file)

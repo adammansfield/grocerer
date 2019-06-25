@@ -2,35 +2,45 @@ package openapi
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
 
 // AddItem adds an item to a list
 func AddItem(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-
 	client := OGClient{}
 	if client.Login() != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
-	// TODO: unmarshal body into GroceryItem
-	_, err := ioutil.ReadAll(r.Body)
-	if err != nil {
+	item := Item{}
+	if json.NewDecoder(r.Body).Decode(&item) != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	args := mux.Vars(r)
-	if client.AddItem(args["listID"], "sardines") != nil {
+	lists, err := client.GetLists()
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
+	args := mux.Vars(r)
+	listID, err := strconv.Atoi(args["listID"])
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if client.AddItem(lists[listID].Id, item.Name) != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusCreated)
 }
 
