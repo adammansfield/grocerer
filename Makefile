@@ -25,7 +25,7 @@ build: $(gen_dir) $(output) ## Build the container
 
 .PHONY: build-nc
 build-nc: $(gen_dir) $(bin_dir) $(version_file) ## Build the container without caching
-	$(call build_image,--no-cache)
+	$(call build_image,$(app),$(output),--no-cache)
 
 .PHONY: clean
 clean: ## Clean the project
@@ -45,6 +45,10 @@ lint: ## Run gofmt, golint, and go vet
 	golint $(non_gen_src)
 	@echo 'go vet ./internal/...'
 	go vet ./internal/...
+
+.PHONY: push
+push: ## Push the container to Docker Hub
+	./scripts/make/push.sh $(app)
 
 .PHONY: run
 run: ## Run the container
@@ -72,7 +76,7 @@ $(gen_dir): api/openapi.yaml
 	$(RM) internal$(SEP)go$(SEP)api_default.go
 
 $(output): $(bin_dir) $(src) $(version_file)
-	$(call build_image)
+	$(call build_image,$(app),$(output))
 
 $(test_large_success): $(gen_dir) $(src) $(test_dir) $(version_file)
 	$(call run_tests,large_test)
