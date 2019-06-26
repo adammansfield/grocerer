@@ -33,6 +33,18 @@ paths:
           required: true
           schema:
             type: string
+        - name: email
+          in: query
+          description: OurGroceries email
+          required: false
+          schema:
+            type: string
+        - name: password
+          in: query
+          description: OurGroceries password
+          required: false
+          schema:
+            type: string
       requestBody:
         description: Item to add to the grocery list
         required: true
