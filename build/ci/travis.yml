@@ -5,4 +5,5 @@ services: docker
 script:
   - make build
   - make test
+  - make test-large
   - make push
