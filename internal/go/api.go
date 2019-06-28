@@ -10,16 +10,11 @@ import (
 
 // AddItem adds an item to a list
 func AddItem(w http.ResponseWriter, r *http.Request) {
-	// TODO: refactor OGClient.Login() to accept email and password parameters
 	email := r.URL.Query().Get("email")
 	password := r.URL.Query().Get("password")
-	if email != "" && password != "" {
-		container.Config.Email = email
-		container.Config.Password = password
-	}
 
 	client := OGClient{}
-	if client.Login() != nil {
+	if client.Login(email, password) != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}

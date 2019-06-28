@@ -13,7 +13,6 @@ import (
 )
 
 const (
-	host            = "www.ourgroceries.com"
 	mainRawURL      = "https://www.ourgroceries.com"
 	signInRawURL    = "https://www.ourgroceries.com/sign-in"
 	yourListsRawURL = "https://www.ourgroceries.com/your-lists/"
@@ -38,6 +37,17 @@ type yourListsResponse struct {
 	ShoppingLists []List `json:"shoppingLists"`
 }
 
+// addCommonHeaders adds common headers for JSON requests to /your-lists
+func addCommonHeaders(r *http.Request) {
+	r.Header.Add("Accept", "application/json, text/javascript, */*")
+	r.Header.Add("Content-Type", "application/json; charset=UTF-8")
+	r.Header.Add("Host", "www.ourgroceries.com")
+	r.Header.Add("Origin", mainRawURL)
+	r.Header.Add("Referer", yourListsRawURL)
+	r.Header.Add("User-Agent", userAgent)
+	r.Header.Add("X-Requested-With", "XMLHttpRequest")
+}
+
 func buildAddItemRequest(teamID string, listID string, item string) (*http.Request, error) {
 	body, err := json.Marshal(command{Command: "insertItem", ListID: listID, TeamID: teamID, Value: item})
 	if err != nil {
@@ -49,21 +59,15 @@ func buildAddItemRequest(teamID string, listID string, item string) (*http.Reque
 		return nil, err
 	}
 
-	request.Header.Add("Accept", "application/json, text/javascript, */*")
-	request.Header.Add("Content-Type", "application/json; charset=UTF-8")
-	request.Header.Add("Host", host)
-	request.Header.Add("Origin", mainRawURL)
-	request.Header.Add("Referer", yourListsRawURL)
-	request.Header.Add("User-Agent", userAgent)
-	request.Header.Add("X-Requested-With", "XMLHttpRequest")
+	addCommonHeaders(request)
 	return request, nil
 }
 
-func buildLoginRequest() (*http.Request, error) {
+func buildLoginRequest(email string, password string) (*http.Request, error) {
 	form := url.Values{}
 	form.Set("action", "sign-me-in")
-	form.Set("emailAddress", container.Config.Email)
-	form.Set("password", container.Config.Password)
+	form.Set("emailAddress", email)
+	form.Set("password", password)
 	form.Set("staySignedIn", "on")
 
 	request, err := http.NewRequest("POST", signInRawURL, strings.NewReader(form.Encode()))
@@ -90,13 +94,7 @@ func buildListsRequest(teamID string) (*http.Request, error) {
 		return nil, err
 	}
 
-	request.Header.Add("Accept", "application/json, text/javascript, */*")
-	request.Header.Add("Content-Type", "application/json; charset=UTF-8")
-	request.Header.Add("Host", host)
-	request.Header.Add("Origin", mainRawURL)
-	request.Header.Add("Referer", yourListsRawURL)
-	request.Header.Add("User-Agent", userAgent)
-	request.Header.Add("X-Requested-With", "XMLHttpRequest")
+	addCommonHeaders(request)
 	return request, nil
 }
 
@@ -151,8 +149,8 @@ func (client *OGClient) GetLists() ([]List, error) {
 }
 
 // Login authenticates with OurGroceries and returns the user's teamId
-func (client *OGClient) Login() error {
-	request, err := buildLoginRequest()
+func (client *OGClient) Login(email string, password string) error {
+	request, err := buildLoginRequest(email, password)
 	if err != nil {
 		return err
 	}
