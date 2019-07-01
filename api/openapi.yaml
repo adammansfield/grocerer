@@ -22,6 +22,28 @@ paths:
                   $ref: '#/components/schemas/List'
         '401':
           description: Unauthorized
+  /lists/{listID}:
+    get:
+      operationId: getList
+      summary: Get a shopping list
+      parameters:
+        - name: listID
+          in: path
+          description: ID of list to get
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Item'
+        '401':
+          description: Unauthorized
   /lists/{listID}/items:
     post:
       operationId: addItem
