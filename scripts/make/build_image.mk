@@ -1,4 +1,4 @@
-# $(1): tag (docker build -t parameter)
+# $(1): image name and tag (docker build -t parameter)
 # $(2): output filepath
 # $(3): additional docker build args (e.g. --no-cache)
 # The output extracted from the docker image might have an older timestamp.
