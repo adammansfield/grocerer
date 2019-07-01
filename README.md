@@ -23,6 +23,7 @@ make build       # Build the container
 make build-nc    # Build the container without caching
 make clean       # Clean the project
 make lint        # Run gofmt, golint, and go vet
+make push        # Push the container to Docker Hub
 make run         # Run the container
 make stop        # Stop and remove the running container
 make test        # Run the small (unit) tests
