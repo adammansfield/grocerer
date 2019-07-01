@@ -3,7 +3,7 @@ _bin/
 _gen/
 _test/
 internal/go/version.go
-config.json
+.ourgroceries
 
 # TODO: Remove below when openapi-generator is removed
 internal/.openapi-generator/
