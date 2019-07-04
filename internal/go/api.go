@@ -14,7 +14,7 @@ func AddItem(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("email")
 	password := r.URL.Query().Get("password")
 
-	client := ourgrocer.OGClient{}
+	client := ourgrocer.Client{}
 	if client.Login(email, password) != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		return

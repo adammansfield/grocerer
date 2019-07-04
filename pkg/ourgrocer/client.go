@@ -26,8 +26,8 @@ var (
 	httpClient   = http.Client{Jar: cookieJar}
 )
 
-// OGClient is a client for OurGroceries
-type OGClient struct {
+// Client is a client for OurGroceries
+type Client struct {
 	TeamID string
 }
 
@@ -140,7 +140,7 @@ func extractTeamID(r io.Reader) (string, error) {
 }
 
 // GetLists gets the grocery lists from OurGroceries
-func (client *OGClient) GetLists() ([]List, error) {
+func (client *Client) GetLists() ([]List, error) {
 	request, err := buildListsRequest(client.TeamID)
 	if err != nil {
 		return nil, err
@@ -160,7 +160,7 @@ func (client *OGClient) GetLists() ([]List, error) {
 }
 
 // Login authenticates with OurGroceries and returns the user's teamId
-func (client *OGClient) Login(email string, password string) error {
+func (client *Client) Login(email string, password string) error {
 	request, err := buildLoginRequest(email, password)
 	if err != nil {
 		return err
@@ -190,7 +190,7 @@ func (client *OGClient) Login(email string, password string) error {
 }
 
 // AddItem adds an item to the given list
-func (client *OGClient) AddItem(listID string, item string) error {
+func (client *Client) AddItem(listID string, item string) error {
 	request, err := buildAddItemRequest(client.TeamID, listID, item)
 	if err != nil {
 		return err

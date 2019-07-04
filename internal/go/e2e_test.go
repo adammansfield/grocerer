@@ -20,7 +20,7 @@ func TestAddItem(t *testing.T) {
 	assert(t, email != "", "Environment variable %s is empty or not set", emailEnvVar)
 	assert(t, pass != "", "Environment variable %s is empty or not set", passEnvVar)
 
-	client := ourgrocer.OGClient{}
+	client := ourgrocer.Client{}
 	err := client.Login(email, pass)
 	ok(t, err)
 	assert(t, client.TeamID != "", "teamID not found")

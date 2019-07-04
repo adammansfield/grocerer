@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import fnmatch
 import pathlib
 import os
 import re
@@ -17,8 +16,12 @@ def main():
     go_files = [f for f in files if f.match('*.go')]
     if go_files:
         check_gofmt(go_files)
-        check_golint(go_files)
-        check_govet('./internal/...')
+        # TODO: change go lint path to ./... when openapi-generator is removed
+        check_golint('./...')
+        #check_golint('./internal/go/...')
+        #check_golint('./pkg/...')
+        # TODO: change govet path to ./... when openapi-generator is removed
+        check_govet('./internal/go/...')
 
     make('build')
     make('test')
@@ -31,8 +34,17 @@ def check_gofmt(go_files: List[pathlib.Path]):
             print("    gofmt -s -w {}".format(unformatted_file))
         sys.exit(1)
 
-def check_golint(go_files: List[pathlib.Path]):
+def check_golint(go_files: str):
     warnings = golint(go_files)
+
+    # TODO: remove filter when openapi-generator is removed
+    def ignore(w):
+        for p in ['logger\.go', 'model_.+\.go', 'routers\.go']:
+            if re.search(p, w):
+                return True
+        return False
+
+    warnings = [w for w in warnings if not ignore(w)]
     if warnings:
         print("  Go files must pass golint. Please fix:")
         for warning in warnings:
@@ -91,12 +103,12 @@ def gofmt(files: List[pathlib.Path]) -> List[str]:
             stdout=subprocess.PIPE)
     return result.stdout.decode('utf-8').rstrip('\n').splitlines()
 
-def golint(files: List[pathlib.Path]) -> List[str]:
+def golint(files: str) -> List[str]:
     print("golint")
-    files_arg = [str(f) for f in files]
     result = subprocess.run(
-            ['golint'] + files_arg,
+            ['golint', files],
             check=True,
+            stderr=subprocess.STDOUT,
             stdout=subprocess.PIPE)
     return result.stdout.decode('utf-8').rstrip('\n').splitlines()
 
