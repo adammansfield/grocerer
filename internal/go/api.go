@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/adammansfield/grocerer/pkg/ourgrocer"
 	"github.com/gorilla/mux"
 )
 
@@ -13,7 +14,7 @@ func AddItem(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("email")
 	password := r.URL.Query().Get("password")
 
-	client := OGClient{}
+	client := ourgrocer.OGClient{}
 	if client.Login(email, password) != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
@@ -38,7 +39,7 @@ func AddItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if client.AddItem(lists[listID].Id, item.Name) != nil {
+	if client.AddItem(lists[listID].ID, item.Name) != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}

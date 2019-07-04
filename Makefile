@@ -36,15 +36,21 @@ help:
 	$(HELP)
 .DEFAULT_GOAL := help
 
+# TODO: replace golint with just 'golint ./...' when openapi-generator is removed
+# TODO: replace go vet with just 'go vet ./...' when openapi-generator is removed
 .PHONY: lint
 lint: ## Run gofmt, golint, and go vet
-	@echo 'gofmt -s -w $$(non_gen_src)'
-	gofmt -s -l $(non_gen_src)
-	gofmt -s -w $(non_gen_src)
-	@echo 'golint $$(non_gen_src)'
+	@echo 'gofmt -s -w ./...'
+	gofmt -s -l .
+	gofmt -s -w .
+	@echo 'golint $(non_gen_src)'
 	golint $(non_gen_src)
+	@echo 'golint ./pkg/...'
+	golint ./pkg/...
 	@echo 'go vet ./internal/...'
 	go vet ./internal/...
+	@echo 'go vet ./pkg/...'
+	go vet ./pkg/...
 
 .PHONY: push
 push: ## Push the container to Docker Hub

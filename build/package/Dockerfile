@@ -1,7 +1,11 @@
 FROM golang:1.10 AS build
 WORKDIR /go/src
-COPY go ./go
-COPY main.go .
+COPY internal/go ./go
+COPY internal/main.go .
+
+RUN mkdir -p /go/src/github.com/adammansfield/grocerer/pkg/ourgrocer
+COPY pkg/ourgrocer /go/src/github.com/adammansfield/grocerer/pkg/ourgrocer
+
 ENV CGO_ENABLED=0
 RUN go get -d -v ./...
 RUN go build -a -installsuffix cgo -o openapi .

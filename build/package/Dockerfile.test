@@ -5,8 +5,11 @@ ARG OURGROCERIES_PASSWORD
 ARG tag
 
 WORKDIR /go/src
+RUN mkdir -p /go/src/github.com/adammansfield/grocerer/pkg/ourgrocer
+COPY pkg/ourgrocer /go/src/github.com/adammansfield/grocerer/pkg/ourgrocer
 COPY internal .
 
 ENV CGO_ENABLED=0
 RUN go get -d -v ./...
 RUN go test -v -tags=$tag ./go/...
+RUN go test -v -tags=$tag ./github.com/adammansfield/grocerer/pkg/ourgrocer/...

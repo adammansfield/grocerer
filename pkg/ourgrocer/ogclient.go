@@ -1,4 +1,4 @@
-package openapi
+package ourgrocer
 
 import (
 	"bytes"
@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/http/cookiejar"
 	"net/url"
 	"regexp"
 	"strings"
@@ -19,7 +20,11 @@ const (
 	userAgent       = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.90 Safari/537.36"
 )
 
-var re = regexp.MustCompile(`g_teamId = "([A-Za-z0-9]*)"`)
+var (
+	re           = regexp.MustCompile(`g_teamId = "([A-Za-z0-9]*)"`)
+	cookieJar, _ = cookiejar.New(nil)
+	httpClient   = http.Client{Jar: cookieJar}
+)
 
 // OGClient is a client for OurGroceries
 type OGClient struct {
@@ -31,6 +36,12 @@ type command struct {
 	ListID  string `json:"listId,omitempty"`
 	TeamID  string `json:"teamId"`
 	Value   string `json:"value,omitempty"`
+}
+
+// List is a grocery list
+type List struct {
+	Name string `json:"name,omitempty"`
+	ID   string `json:"id,omitempty"`
 }
 
 type yourListsResponse struct {
@@ -135,7 +146,7 @@ func (client *OGClient) GetLists() ([]List, error) {
 		return nil, err
 	}
 
-	response, err := container.HTTPClient.Do(request)
+	response, err := httpClient.Do(request)
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +166,7 @@ func (client *OGClient) Login(email string, password string) error {
 		return err
 	}
 
-	response, err := container.HTTPClient.Do(request)
+	response, err := httpClient.Do(request)
 	if err != nil {
 		return err
 	}
@@ -169,7 +180,7 @@ func (client *OGClient) Login(email string, password string) error {
 	if err != nil {
 		return err
 	}
-	cookies := container.CookieJar.Cookies(signInURL)
+	cookies := cookieJar.Cookies(signInURL)
 	if cookies == nil {
 		return fmt.Errorf("invalid credentials")
 	}
@@ -185,7 +196,7 @@ func (client *OGClient) AddItem(listID string, item string) error {
 		return err
 	}
 
-	response, err := container.HTTPClient.Do(request)
+	response, err := httpClient.Do(request)
 	if err != nil {
 		return err
 	}

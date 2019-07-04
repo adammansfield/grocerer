@@ -5,6 +5,8 @@ package openapi
 import (
 	"os"
 	"testing"
+
+	"github.com/adammansfield/grocerer/pkg/ourgrocer"
 )
 
 const (
@@ -15,10 +17,10 @@ const (
 func TestAddItem(t *testing.T) {
 	email := os.Getenv(emailEnvVar)
 	pass := os.Getenv(passEnvVar)
-	assert(t, email != "", "Enviornment variable %s is empty or not set", emailEnvVar)
-	assert(t, pass != "", "Enviornment variable %s is empty or not set", passEnvVar)
+	assert(t, email != "", "Environment variable %s is empty or not set", emailEnvVar)
+	assert(t, pass != "", "Environment variable %s is empty or not set", passEnvVar)
 
-	client := OGClient{}
+	client := ourgrocer.OGClient{}
 	err := client.Login(email, pass)
 	ok(t, err)
 	assert(t, client.TeamID != "", "teamID not found")
@@ -27,7 +29,7 @@ func TestAddItem(t *testing.T) {
 	ok(t, err)
 	assert(t, len(lists) > 0, "lists not found")
 
-	listID := lists[0].Id
+	listID := lists[0].ID
 	err = client.AddItem(listID, "sardines")
 	ok(t, err)
 }

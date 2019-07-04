@@ -5,7 +5,11 @@
 # So update the output's timestamp to ensure that it is newer than its prerequisites.
 # Then make will not unnecessarily rebuild.
 define build_image
-	docker build $(3) -t $(1) internal
+	docker build \
+		$(3) \
+		-t $(1) \
+		-f build/package/Dockerfile \
+		.
 	$(EXTRACT) $(1) openapi $(2)
 	$(TOUCH) $(2)
 endef
