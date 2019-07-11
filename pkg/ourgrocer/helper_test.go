@@ -1,6 +1,6 @@
 // https://github.com/benbjohnson/testing
 
-package ourgrocer
+package ourgrocer_test
 
 import (
 	"fmt"

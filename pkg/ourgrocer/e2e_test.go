@@ -1,6 +1,6 @@
 // +build large_test
 
-package openapi
+package ourgrocer_test
 
 import (
 	"os"

@@ -125,8 +125,9 @@ func extractLists(body io.Reader) ([]List, error) {
 	return response.ShoppingLists, nil
 }
 
-// extractTeamId returns teamId from the response body of /sign-in
-func extractTeamID(r io.Reader) (string, error) {
+// ExtractTeamID returns teamId from the response body of /sign-in
+// TODO: make ExtractTeamID a private function
+func ExtractTeamID(r io.Reader) (string, error) {
 	bytes, err := ioutil.ReadAll(r)
 	if err != nil {
 		return "", err
@@ -185,7 +186,7 @@ func (client *Client) Login(email string, password string) error {
 		return fmt.Errorf("invalid credentials")
 	}
 
-	client.TeamID, err = extractTeamID(response.Body)
+	client.TeamID, err = ExtractTeamID(response.Body)
 	return err
 }
 
