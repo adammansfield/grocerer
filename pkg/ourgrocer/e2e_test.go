@@ -32,4 +32,8 @@ func TestAddItem(t *testing.T) {
 	listID := lists[0].ID
 	err = client.AddItem(listID, "sardines")
 	ok(t, err)
+
+	// TODO: check if sardines is on the list
+	err = client.GetList(listID)
+	ok(t, err)
 }

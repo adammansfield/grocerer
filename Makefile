@@ -15,7 +15,9 @@ test_dir := _test
 non_gen_src:=$(shell find internal -name "*.go" ! -name logger.go ! -name main.go ! -name model_*.go ! -name routers.go)
 
 output := $(bin_dir)/openapi
-src := $(shell $(FIND) internal *.go version.go)
+# TODO: combine internal_src and pkg_src to src when openapi-generator is removed
+internal_src := $(shell $(FIND) internal *.go version.go)
+pkg_src := $(shell $(FIND) pkg *.go)
 test_large_success := $(test_dir)/test_large_success
 test_small_success := $(test_dir)/test_small_success
 version_file := internal/go/version.go
@@ -81,19 +83,19 @@ $(gen_dir): api/openapi.yaml
 	$(CP) $(gen_dir)$(SEP)servers$(SEP)go/main.go internal/main.go
 	$(RM) internal$(SEP)go$(SEP)api_default.go
 
-$(output): $(bin_dir) $(src) $(version_file)
+$(output): $(bin_dir) $(internal_src) $(pkg_src) $(version_file)
 	$(call build_image,$(app),$(output))
 
-$(test_large_success): $(gen_dir) $(src) $(test_dir) $(version_file)
+$(test_large_success): $(gen_dir) $(internal_src) $(pkg_src) $(test_dir) $(version_file)
 	$(call run_tests,large_test)
 	$(TOUCH) $@
 
-$(test_small_success): $(gen_dir) $(src) $(test_dir) $(version_file)
+$(test_small_success): $(gen_dir) $(internal_src) $(pkg_src) $(test_dir) $(version_file)
 	$(call run_tests,small_test)
 	$(TOUCH) $@
 
 $(test_dir):
 	mkdir $@
 
-$(version_file): $(gen_dir) $(src)
+$(version_file): $(gen_dir) $(internal_src) $(pkg_src)
 	$(VERSION)

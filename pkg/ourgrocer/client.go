@@ -26,7 +26,7 @@ var (
 	httpClient   = http.Client{Jar: cookieJar}
 )
 
-// Client is a client for OurGroceries
+// Client is an OurGroceries client
 type Client struct {
 	TeamID string
 }
@@ -48,19 +48,8 @@ type yourListsResponse struct {
 	ShoppingLists []List `json:"shoppingLists"`
 }
 
-// addCommonHeaders adds common headers for JSON requests to /your-lists
-func addCommonHeaders(r *http.Request) {
-	r.Header.Add("Accept", "application/json, text/javascript, */*")
-	r.Header.Add("Content-Type", "application/json; charset=UTF-8")
-	r.Header.Add("Host", "www.ourgroceries.com")
-	r.Header.Add("Origin", mainRawURL)
-	r.Header.Add("Referer", yourListsRawURL)
-	r.Header.Add("User-Agent", userAgent)
-	r.Header.Add("X-Requested-With", "XMLHttpRequest")
-}
-
-func buildAddItemRequest(teamID string, listID string, item string) (*http.Request, error) {
-	body, err := json.Marshal(command{Command: "insertItem", ListID: listID, TeamID: teamID, Value: item})
+func buildYourListsRequest(cmd command) (*http.Request, error) {
+	body, err := json.Marshal(cmd)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +59,13 @@ func buildAddItemRequest(teamID string, listID string, item string) (*http.Reque
 		return nil, err
 	}
 
-	addCommonHeaders(request)
+	request.Header.Add("Accept", "application/json, text/javascript, */*")
+	request.Header.Add("Content-Type", "application/json; charset=UTF-8")
+	request.Header.Add("Host", "www.ourgroceries.com")
+	request.Header.Add("Origin", mainRawURL)
+	request.Header.Add("Referer", yourListsRawURL)
+	request.Header.Add("User-Agent", userAgent)
+	request.Header.Add("X-Requested-With", "XMLHttpRequest")
 	return request, nil
 }
 
@@ -90,22 +85,6 @@ func buildLoginRequest(email string, password string) (*http.Request, error) {
 	request.Header.Add("Origin", mainRawURL)
 	request.Header.Add("Referer", signInRawURL)
 	request.Header.Add("User-Agent", userAgent)
-	return request, nil
-}
-
-// buildListsRequest returns request for a secret get lists in JSON
-func buildListsRequest(teamID string) (*http.Request, error) {
-	body, err := json.Marshal(command{Command: "getOverview", TeamID: teamID})
-	if err != nil {
-		return nil, err
-	}
-
-	request, err := http.NewRequest("POST", yourListsRawURL, bytes.NewReader(body))
-	if err != nil {
-		return nil, err
-	}
-
-	addCommonHeaders(request)
 	return request, nil
 }
 
@@ -142,7 +121,8 @@ func ExtractTeamID(r io.Reader) (string, error) {
 
 // GetLists gets the grocery lists from OurGroceries
 func (client *Client) GetLists() ([]List, error) {
-	request, err := buildListsRequest(client.TeamID)
+	cmd := command{Command: "getOverview", TeamID: client.TeamID}
+	request, err := buildYourListsRequest(cmd)
 	if err != nil {
 		return nil, err
 	}
@@ -158,6 +138,50 @@ func (client *Client) GetLists() ([]List, error) {
 	}
 
 	return extractLists(response.Body)
+}
+
+// AddItem adds an item to the given list
+func (client *Client) AddItem(listID string, item string) error {
+	cmd := command{Command: "insertItem", ListID: listID, TeamID: client.TeamID, Value: item}
+	request, err := buildYourListsRequest(cmd)
+	if err != nil {
+		return err
+	}
+
+	response, err := httpClient.Do(request)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return fmt.Errorf("unexpected status code %d for %s", response.StatusCode, response.Request.URL.String())
+	}
+
+	return nil
+}
+
+// GetList gets grocery items for a list
+func (client *Client) GetList(listID string) error {
+	cmd := command{Command: "getList", ListID: listID, TeamID: client.TeamID}
+	request, err := buildYourListsRequest(cmd)
+	if err != nil {
+		return err
+	}
+
+	response, err := httpClient.Do(request)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return fmt.Errorf("unexpected status code %d for %s", response.StatusCode, response.Request.URL.String())
+	}
+
+	// TODO: parse response.Body
+
+	return nil
 }
 
 // Login authenticates with OurGroceries and returns the user's teamId
@@ -188,24 +212,4 @@ func (client *Client) Login(email string, password string) error {
 
 	client.TeamID, err = ExtractTeamID(response.Body)
 	return err
-}
-
-// AddItem adds an item to the given list
-func (client *Client) AddItem(listID string, item string) error {
-	request, err := buildAddItemRequest(client.TeamID, listID, item)
-	if err != nil {
-		return err
-	}
-
-	response, err := httpClient.Do(request)
-	if err != nil {
-		return err
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode != http.StatusOK {
-		return fmt.Errorf("unexpected status code %d for %s", response.StatusCode, response.Request.URL.String())
-	}
-
-	return nil
 }
