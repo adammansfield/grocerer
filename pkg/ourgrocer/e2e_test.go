@@ -34,6 +34,6 @@ func TestAddItem(t *testing.T) {
 	ok(t, err)
 
 	// TODO: check if sardines is on the list
-	err = client.GetList(listID)
+	_, err = client.GetList(listID)
 	ok(t, err)
 }

@@ -38,7 +38,29 @@ type command struct {
 	Value   string `json:"value,omitempty"`
 }
 
+type list struct {
+	NotesHTML string `json:"notesHtml"`
+	VersionID string `json:"versionId"`
+	Notes     string `json:"notes"`
+	Name      string `json:"name"`
+	ID        string `json:"id"`
+	ListType  string `json:"listType"`
+	Items     []Item `json:"items"`
+}
+
+type getListResponse struct {
+	List list `json:"list"`
+}
+
+// Item is a grocery item
+type Item struct {
+	ID         string `json:"id"`
+	Value      string `json:"value"`
+	CategoryID string `json:"categoryid"`
+}
+
 // List is a grocery list
+// TODO: rename to ListID
 type List struct {
 	Name string `json:"name,omitempty"`
 	ID   string `json:"id,omitempty"`
@@ -119,25 +141,21 @@ func ExtractTeamID(r io.Reader) (string, error) {
 	return teamIds[1], nil
 }
 
-// GetLists gets the grocery lists from OurGroceries
-func (client *Client) GetLists() ([]List, error) {
-	cmd := command{Command: "getOverview", TeamID: client.TeamID}
-	request, err := buildYourListsRequest(cmd)
+// ParseGroceryList returns []Item from the response body of getList
+// TODO: make ParseGroceryList a private function
+func ParseGroceryList(r io.Reader) ([]Item, error) {
+	bytes, err := ioutil.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := httpClient.Do(request)
+	result := getListResponse{}
+	err = json.Unmarshal(bytes, &result)
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
 
-	if response.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected status code %d for %s", response.StatusCode, response.Request.URL.String())
-	}
-
-	return extractLists(response.Body)
+	return result.List.Items, err
 }
 
 // AddItem adds an item to the given list
@@ -162,26 +180,45 @@ func (client *Client) AddItem(listID string, item string) error {
 }
 
 // GetList gets grocery items for a list
-func (client *Client) GetList(listID string) error {
+func (client *Client) GetList(listID string) ([]Item, error) {
 	cmd := command{Command: "getList", ListID: listID, TeamID: client.TeamID}
 	request, err := buildYourListsRequest(cmd)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	response, err := httpClient.Do(request)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		return fmt.Errorf("unexpected status code %d for %s", response.StatusCode, response.Request.URL.String())
+		return nil, fmt.Errorf("unexpected status code %d for %s", response.StatusCode, response.Request.URL.String())
 	}
 
-	// TODO: parse response.Body
+	return ParseGroceryList(response.Body)
+}
 
-	return nil
+// GetLists gets the grocery lists from OurGroceries
+func (client *Client) GetLists() ([]List, error) {
+	cmd := command{Command: "getOverview", TeamID: client.TeamID}
+	request, err := buildYourListsRequest(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := httpClient.Do(request)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code %d for %s", response.StatusCode, response.Request.URL.String())
+	}
+
+	return extractLists(response.Body)
 }
 
 // Login authenticates with OurGroceries and returns the user's teamId
