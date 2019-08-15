@@ -41,12 +41,12 @@ func TestGetLists(t *testing.T) {
 }
 
 func TestAddItem(t *testing.T) {
-	err := f.Client.AddItem(f.listID(), f.Item)
+	err := f.Client.AddItem(f.listID(t), f.Item)
 	ok(t, err)
 }
 
 func TestGetList(t *testing.T) {
-	items, err := f.Client.GetList(f.listID())
+	items, err := f.Client.GetList(f.listID(t))
 	ok(t, err)
 	assert(t, containsName(items, f.Item), "%s was not added to the grocery list", f.Item)
 }
@@ -79,7 +79,8 @@ func getPass(t *testing.T) string {
 	return result
 }
 
-func (f *fixture) listID() string {
+func (f *fixture) listID(t *testing.T) string {
+	assert(t, len(f.ListIDs) > 0, "failed to get lists in previous a step")
 	return f.ListIDs[0].ID
 }
 
