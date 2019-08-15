@@ -14,11 +14,11 @@ import (
 
 // Test fixture for storing state between tests to avoid multiple logins
 type fixture struct {
-	Client ourgrocer.Client
-	Email  string           // Ourgroceries email
-	Item   string           // Item to be added using AddItem
-	Lists  []ourgrocer.List // Lists returned by GetLists
-	Pass   string           // Ourgroceries password
+	Client  ourgrocer.Client
+	Email   string             // Ourgroceries email
+	Item    string             // Item to be added using AddItem
+	ListIDs []ourgrocer.ListID // Lists returned by GetLists
+	Pass    string             // Ourgroceries password
 }
 
 var f fixture
@@ -35,9 +35,9 @@ func TestLogin(t *testing.T) {
 
 func TestGetLists(t *testing.T) {
 	var err error
-	f.Lists, err = f.Client.GetLists()
+	f.ListIDs, err = f.Client.GetLists()
 	ok(t, err)
-	assert(t, len(f.Lists) > 0, "lists not found")
+	assert(t, len(f.ListIDs) > 0, "lists not found")
 }
 
 func TestAddItem(t *testing.T) {
@@ -80,7 +80,7 @@ func getPass(t *testing.T) string {
 }
 
 func (f *fixture) listID() string {
-	return f.Lists[0].ID
+	return f.ListIDs[0].ID
 }
 
 func newFixture(t *testing.T) fixture {

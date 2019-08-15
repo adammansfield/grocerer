@@ -31,43 +31,53 @@ type Client struct {
 	TeamID string
 }
 
-type command struct {
-	Command string `json:"command"`
-	ListID  string `json:"listId,omitempty"`
-	TeamID  string `json:"teamId"`
-	Value   string `json:"value,omitempty"`
+// AddItem adds an item to the given list
+func (client *Client) AddItem(listID string, item string) error {
+	_, err := call(command{"insertItem", client.TeamID, listID, item})
+	return err
 }
 
-type list struct {
-	NotesHTML string `json:"notesHtml"`
-	VersionID string `json:"versionId"`
-	Notes     string `json:"notes"`
-	Name      string `json:"name"`
-	ID        string `json:"id"`
-	ListType  string `json:"listType"`
-	Items     []Item `json:"items"`
+// GetList gets grocery items for a list
+func (client *Client) GetList(listID string) ([]Item, error) {
+	body, err := call(command{"getList", client.TeamID, listID, ""})
+	return HandleGetList(body, err)
 }
 
-type getListResponse struct {
-	List list `json:"list"`
+// GetLists gets the grocery lists from OurGroceries
+func (client *Client) GetLists() ([]ListID, error) {
+	body, err := call(command{"getOverview", client.TeamID, "", ""})
+	return handleGetLists(body, err)
 }
 
-// Item is a grocery item
-type Item struct {
-	ID         string `json:"id"`
-	Value      string `json:"value"`
-	CategoryID string `json:"categoryid"`
-}
+// Login authenticates with OurGroceries and returns the user's teamId
+func (client *Client) Login(email string, password string) error {
+	request, err := buildLoginRequest(email, password)
+	if err != nil {
+		return err
+	}
 
-// List is a grocery list
-// TODO: rename to ListID
-type List struct {
-	Name string `json:"name,omitempty"`
-	ID   string `json:"id,omitempty"`
-}
+	response, err := httpClient.Do(request)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
 
-type yourListsResponse struct {
-	ShoppingLists []List `json:"shoppingLists"`
+	err = handleStatusCode(response)
+	if err != nil {
+		return err
+	}
+
+	signInURL, err := url.Parse(signInRawURL)
+	if err != nil {
+		return err
+	}
+	cookies := cookieJar.Cookies(signInURL)
+	if cookies == nil {
+		return fmt.Errorf("invalid credentials")
+	}
+
+	client.TeamID, err = ExtractTeamID(response.Body)
+	return err
 }
 
 func buildYourListsRequest(cmd command) (*http.Request, error) {
@@ -110,20 +120,24 @@ func buildLoginRequest(email string, password string) (*http.Request, error) {
 	return request, nil
 }
 
-// extractLists returns grocery lists from the response body of getOverview
-func extractLists(body io.Reader) ([]List, error) {
-	bytes, err := ioutil.ReadAll(body)
+func call(cmd command) ([]byte, error) {
+	request, err := buildYourListsRequest(cmd)
 	if err != nil {
 		return nil, err
 	}
 
-	response := yourListsResponse{}
-	err = json.Unmarshal(bytes, &response)
+	response, err := httpClient.Do(request)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	err = handleStatusCode(response)
 	if err != nil {
 		return nil, err
 	}
 
-	return response.ShoppingLists, nil
+	return ioutil.ReadAll(response.Body)
 }
 
 // ExtractTeamID returns teamId from the response body of /sign-in
@@ -141,10 +155,9 @@ func ExtractTeamID(r io.Reader) (string, error) {
 	return teamIds[1], nil
 }
 
-// ParseGroceryList returns []Item from the response body of getList
-// TODO: make ParseGroceryList a private function
-func ParseGroceryList(r io.Reader) ([]Item, error) {
-	bytes, err := ioutil.ReadAll(r)
+// HandleGetList returns []Item from the response body of getList
+// TODO: make HandleGetList a private function
+func HandleGetList(bytes []byte, err error) ([]Item, error) {
 	if err != nil {
 		return nil, err
 	}
@@ -158,95 +171,24 @@ func ParseGroceryList(r io.Reader) ([]Item, error) {
 	return result.List.Items, err
 }
 
-// AddItem adds an item to the given list
-func (client *Client) AddItem(listID string, item string) error {
-	cmd := command{Command: "insertItem", ListID: listID, TeamID: client.TeamID, Value: item}
-	request, err := buildYourListsRequest(cmd)
+func handleGetLists(bytes []byte, err error) ([]ListID, error) {
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	response, err := httpClient.Do(request)
+	response := getOverviewResponse{}
+	err = json.Unmarshal(bytes, &response)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	defer response.Body.Close()
 
+	return response.ShoppingLists, nil
+}
+
+func handleStatusCode(response *http.Response) error {
 	if response.StatusCode != http.StatusOK {
 		return fmt.Errorf("unexpected status code %d for %s", response.StatusCode, response.Request.URL.String())
 	}
 
 	return nil
-}
-
-// GetList gets grocery items for a list
-func (client *Client) GetList(listID string) ([]Item, error) {
-	cmd := command{Command: "getList", ListID: listID, TeamID: client.TeamID}
-	request, err := buildYourListsRequest(cmd)
-	if err != nil {
-		return nil, err
-	}
-
-	response, err := httpClient.Do(request)
-	if err != nil {
-		return nil, err
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected status code %d for %s", response.StatusCode, response.Request.URL.String())
-	}
-
-	return ParseGroceryList(response.Body)
-}
-
-// GetLists gets the grocery lists from OurGroceries
-func (client *Client) GetLists() ([]List, error) {
-	cmd := command{Command: "getOverview", TeamID: client.TeamID}
-	request, err := buildYourListsRequest(cmd)
-	if err != nil {
-		return nil, err
-	}
-
-	response, err := httpClient.Do(request)
-	if err != nil {
-		return nil, err
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected status code %d for %s", response.StatusCode, response.Request.URL.String())
-	}
-
-	return extractLists(response.Body)
-}
-
-// Login authenticates with OurGroceries and returns the user's teamId
-func (client *Client) Login(email string, password string) error {
-	request, err := buildLoginRequest(email, password)
-	if err != nil {
-		return err
-	}
-
-	response, err := httpClient.Do(request)
-	if err != nil {
-		return err
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode != http.StatusOK {
-		return fmt.Errorf("unexpected status code %d for %s", response.StatusCode, response.Request.URL.String())
-	}
-
-	signInURL, err := url.Parse(signInRawURL)
-	if err != nil {
-		return err
-	}
-	cookies := cookieJar.Cookies(signInURL)
-	if cookies == nil {
-		return fmt.Errorf("invalid credentials")
-	}
-
-	client.TeamID, err = ExtractTeamID(response.Body)
-	return err
 }

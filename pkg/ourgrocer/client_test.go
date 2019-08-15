@@ -18,8 +18,8 @@ func TestExtractTeamId(t *testing.T) {
 }
 
 // TODO: modify test to only call GetList (and still test grocery list parsing)
-func TestParseGroceryList(t *testing.T) {
-	json := `
+func TestHandleGetList(t *testing.T) {
+	body := []byte(`
 	{
 	  "list":{
 	    "notesHtml":null,
@@ -40,9 +40,8 @@ func TestParseGroceryList(t *testing.T) {
 	      }
 	    ]
 	  }
-	}`
-	stream := strings.NewReader(json)
-	items, err := ourgrocer.ParseGroceryList(stream)
+	}`)
+	items, err := ourgrocer.HandleGetList(body, nil)
 	ok(t, err)
 	equals(t, items, []ourgrocer.Item{{ID: "VVbCucm4eT30FIW9ptejCr", Value: "celery", CategoryID: "ow7os337oMPoE2RnZPelRI"}, {ID: "irezU2ekUw34Sbk8YoNG3Q", Value: "cherries"}})
 }
