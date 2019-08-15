@@ -3,6 +3,8 @@
 package ourgrocer_test
 
 import (
+	"encoding/base64"
+	"math/rand"
 	"os"
 	"strings"
 	"testing"
@@ -58,8 +60,11 @@ func containsName(items []ourgrocer.Item, name string) bool {
 	return false
 }
 
-func (f *fixture) listID() string {
-	return f.Lists[0].ID
+func generateItem(t *testing.T) string {
+	buf := make([]byte, 24)
+	_, err := rand.Read(buf)
+	ok(t, err)
+	return base64.StdEncoding.EncodeToString(buf)
 }
 
 func getEmail(t *testing.T) string {
@@ -74,12 +79,15 @@ func getPass(t *testing.T) string {
 	return result
 }
 
+func (f *fixture) listID() string {
+	return f.Lists[0].ID
+}
+
 func newFixture(t *testing.T) fixture {
 	f := fixture{}
 	f.Client = ourgrocer.Client{}
 	f.Email = getEmail(t)
-	// TODO: randomly generate item name
-	f.Item = "sardines"
+	f.Item = generateItem(t)
 	f.Pass = getPass(t)
 	return f
 }
