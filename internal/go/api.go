@@ -11,11 +11,8 @@ import (
 
 // AddItem adds an item to a list
 func AddItem(w http.ResponseWriter, r *http.Request) {
-	email := r.URL.Query().Get("email")
-	password := r.URL.Query().Get("password")
-
-	client := ourgrocer.Client{}
-	if client.Login(email, password) != nil {
+	client, err := login(r)
+	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -56,8 +53,21 @@ func GetList(w http.ResponseWriter, r *http.Request) {
 
 // GetLists responds with the grocery lists
 func GetLists(w http.ResponseWriter, r *http.Request) {
+	client, err := login(r)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	lists, err := client.GetLists()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(lists)
 }
 
 // GetVersion responds with the API version and build date
@@ -65,4 +75,13 @@ func GetVersion(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(PackageVersion)
+}
+
+func login(r *http.Request) (ourgrocer.Client, error) {
+	email := r.URL.Query().Get("email")
+	password := r.URL.Query().Get("password")
+
+	client := ourgrocer.Client{}
+	err := client.Login(email, password)
+	return client, err
 }
