@@ -21,42 +21,70 @@ const (
 )
 
 var (
-	re           = regexp.MustCompile(`g_teamId = "([A-Za-z0-9]*)"`)
-	cookieJar, _ = cookiejar.New(nil)
-	httpClient   = http.Client{Jar: cookieJar}
+	teamIDRegEx = regexp.MustCompile(`g_teamId = "([A-Za-z0-9]*)"`)
 )
 
-// Client is an OurGroceries client
+// Client is an OurGroceries client.
 type Client struct {
-	TeamID string
+	cookieJar  *cookiejar.Jar
+	httpClient http.Client
+	teamID     string
 }
 
-// AddItem adds an item to the given list
+// NewClient returns a Client.
+func NewClient(cookieJar *cookiejar.Jar, httpClient http.Client) Client {
+	result := Client{}
+	result.cookieJar = cookieJar
+	result.httpClient = httpClient
+	return result
+}
+
+// AddItem adds an item to the given list.
 func (client *Client) AddItem(listID string, item string) error {
-	_, err := call(command{"insertItem", client.TeamID, listID, item})
+	_, err := client.call(command{"insertItem", client.teamID, listID, item})
 	return err
 }
 
-// GetList gets grocery items for a list
+func (client *Client) call(cmd command) ([]byte, error) {
+	request, err := buildYourListsRequest(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := client.httpClient.Do(request)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	err = handleStatusCode(response)
+	if err != nil {
+		return nil, err
+	}
+
+	return ioutil.ReadAll(response.Body)
+}
+
+// GetList gets grocery items for a list.
 func (client *Client) GetList(listID string) ([]Item, error) {
-	body, err := call(command{"getList", client.TeamID, listID, ""})
+	body, err := client.call(command{"getList", client.teamID, listID, ""})
 	return HandleGetList(body, err)
 }
 
-// GetLists gets the grocery lists from OurGroceries
+// GetLists gets the grocery lists from OurGroceries.
 func (client *Client) GetLists() ([]ListID, error) {
-	body, err := call(command{"getOverview", client.TeamID, "", ""})
+	body, err := client.call(command{"getOverview", client.teamID, "", ""})
 	return handleGetLists(body, err)
 }
 
-// Login authenticates with OurGroceries and returns the user's teamId
+// Login authenticates with OurGroceries and returns the user's teamID
 func (client *Client) Login(email string, password string) error {
 	request, err := buildLoginRequest(email, password)
 	if err != nil {
 		return err
 	}
 
-	response, err := httpClient.Do(request)
+	response, err := client.httpClient.Do(request)
 	if err != nil {
 		return err
 	}
@@ -71,12 +99,12 @@ func (client *Client) Login(email string, password string) error {
 	if err != nil {
 		return err
 	}
-	cookies := cookieJar.Cookies(signInURL)
+	cookies := client.cookieJar.Cookies(signInURL)
 	if cookies == nil {
 		return fmt.Errorf("invalid credentials")
 	}
 
-	client.TeamID, err = ExtractTeamID(response.Body)
+	client.teamID, err = ExtractTeamID(response.Body)
 	return err
 }
 
@@ -120,27 +148,7 @@ func buildLoginRequest(email string, password string) (*http.Request, error) {
 	return request, nil
 }
 
-func call(cmd command) ([]byte, error) {
-	request, err := buildYourListsRequest(cmd)
-	if err != nil {
-		return nil, err
-	}
-
-	response, err := httpClient.Do(request)
-	if err != nil {
-		return nil, err
-	}
-	defer response.Body.Close()
-
-	err = handleStatusCode(response)
-	if err != nil {
-		return nil, err
-	}
-
-	return ioutil.ReadAll(response.Body)
-}
-
-// ExtractTeamID returns teamId from the response body of /sign-in
+// ExtractTeamID returns teamID from the response body of /sign-in.
 // TODO: make ExtractTeamID a private function
 func ExtractTeamID(r io.Reader) (string, error) {
 	bytes, err := ioutil.ReadAll(r)
@@ -148,14 +156,14 @@ func ExtractTeamID(r io.Reader) (string, error) {
 		return "", err
 	}
 
-	teamIds := re.FindStringSubmatch(string(bytes))
+	teamIds := teamIDRegEx.FindStringSubmatch(string(bytes))
 	if len(teamIds) < 2 {
-		return "", fmt.Errorf("teamId not found in body")
+		return "", fmt.Errorf("teamID not found in body")
 	}
 	return teamIds[1], nil
 }
 
-// HandleGetList returns []Item from the response body of getList
+// HandleGetList returns []Item from the response body of getList.
 // TODO: make HandleGetList a private function
 func HandleGetList(bytes []byte, err error) ([]Item, error) {
 	if err != nil {

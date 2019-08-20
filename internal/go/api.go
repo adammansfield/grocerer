@@ -3,6 +3,7 @@ package openapi
 import (
 	"encoding/json"
 	"net/http"
+	"net/http/cookiejar"
 	"strconv"
 
 	"github.com/adammansfield/grocerer/pkg/ourgrocer"
@@ -77,11 +78,17 @@ func GetVersion(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(PackageVersion)
 }
 
+func newClient() ourgrocer.Client {
+	cookieJar, _ := cookiejar.New(nil)
+	httpClient := http.Client{Jar: cookieJar}
+	return ourgrocer.NewClient(cookieJar, httpClient)
+}
+
 func login(r *http.Request) (ourgrocer.Client, error) {
 	email := r.URL.Query().Get("email")
 	password := r.URL.Query().Get("password")
 
-	client := ourgrocer.Client{}
+	client := newClient()
 	err := client.Login(email, password)
 	return client, err
 }

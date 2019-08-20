@@ -5,6 +5,8 @@ package ourgrocer_test
 import (
 	"encoding/base64"
 	"math/rand"
+	"net/http"
+	"net/http/cookiejar"
 	"os"
 	"strings"
 	"testing"
@@ -14,11 +16,11 @@ import (
 
 // Test fixture for storing state between tests to avoid multiple logins
 type fixture struct {
-	Client  ourgrocer.Client
-	Email   string             // Ourgroceries email
-	Item    string             // Item to be added using AddItem
-	ListIDs []ourgrocer.ListID // Lists returned by GetLists
-	Pass    string             // Ourgroceries password
+	Client   ourgrocer.Client
+	Email    string             // Ourgroceries email
+	Item     string             // Item to be added using AddItem
+	ListIDs  []ourgrocer.ListID // Lists returned by GetLists
+	Password string             // Ourgroceries password
 }
 
 var f fixture
@@ -28,9 +30,8 @@ func TestSetup(t *testing.T) {
 }
 
 func TestLogin(t *testing.T) {
-	err := f.Client.Login(f.Email, f.Pass)
+	err := f.Client.Login(f.Email, f.Password)
 	ok(t, err)
-	assert(t, f.Client.TeamID != "", "teamID not found")
 }
 
 func TestGetLists(t *testing.T) {
@@ -73,7 +74,7 @@ func getEmail(t *testing.T) string {
 	return result
 }
 
-func getPass(t *testing.T) string {
+func getPassword(t *testing.T) string {
 	result := os.Getenv("OURGROCERIES_PASSWORD")
 	assert(t, result != "", "Environment variable %s is empty or not set", "OURGROCERIES_PASSWORD")
 	return result
@@ -84,11 +85,17 @@ func (f *fixture) listID(t *testing.T) string {
 	return f.ListIDs[0].ID
 }
 
+func newClient() ourgrocer.Client {
+	cookieJar, _ := cookiejar.New(nil)
+	httpClient := http.Client{Jar: cookieJar}
+	return ourgrocer.NewClient(cookieJar, httpClient)
+}
+
 func newFixture(t *testing.T) fixture {
 	f := fixture{}
-	f.Client = ourgrocer.Client{}
+	f.Client = newClient()
 	f.Email = getEmail(t)
 	f.Item = generateItem(t)
-	f.Pass = getPass(t)
+	f.Password = getPassword(t)
 	return f
 }
