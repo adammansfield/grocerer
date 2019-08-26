@@ -81,7 +81,7 @@ func GetVersion(w http.ResponseWriter, r *http.Request) {
 func newClient() ourgrocer.Client {
 	cookieJar, _ := cookiejar.New(nil)
 	httpClient := http.Client{Jar: cookieJar}
-	return ourgrocer.NewClient(cookieJar, httpClient)
+	return ourgrocer.NewClient(cookieJar, &httpClient)
 }
 
 func login(r *http.Request) (ourgrocer.Client, error) {

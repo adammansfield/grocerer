@@ -24,15 +24,20 @@ var (
 	teamIDRegEx = regexp.MustCompile(`g_teamId = "([A-Za-z0-9]*)"`)
 )
 
+// HTTPClient in an interface for http.Client
+type HTTPClient interface {
+	Do(r *http.Request) (*http.Response, error)
+}
+
 // Client is an OurGroceries client.
 type Client struct {
 	cookieJar  *cookiejar.Jar
-	httpClient http.Client
+	httpClient HTTPClient
 	teamID     string
 }
 
 // NewClient returns a Client.
-func NewClient(cookieJar *cookiejar.Jar, httpClient http.Client) Client {
+func NewClient(cookieJar *cookiejar.Jar, httpClient HTTPClient) Client {
 	result := Client{}
 	result.cookieJar = cookieJar
 	result.httpClient = httpClient

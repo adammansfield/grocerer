@@ -25,28 +25,28 @@ type fixture struct {
 
 var f fixture
 
-func TestSetup(t *testing.T) {
+func TestSetup_e2e(t *testing.T) {
 	f = newFixture(t)
 }
 
-func TestLogin(t *testing.T) {
+func TestLogin_e2e(t *testing.T) {
 	err := f.Client.Login(f.Email, f.Password)
 	ok(t, err)
 }
 
-func TestGetLists(t *testing.T) {
+func TestGetLists_e2e(t *testing.T) {
 	var err error
 	f.ListIDs, err = f.Client.GetLists()
 	ok(t, err)
 	assert(t, len(f.ListIDs) > 0, "lists not found")
 }
 
-func TestAddItem(t *testing.T) {
+func TestAddItem_e2e(t *testing.T) {
 	err := f.Client.AddItem(f.listID(t), f.Item)
 	ok(t, err)
 }
 
-func TestGetList(t *testing.T) {
+func TestGetList_e2e(t *testing.T) {
 	items, err := f.Client.GetList(f.listID(t))
 	ok(t, err)
 	assert(t, containsName(items, f.Item), "%s was not added to the grocery list", f.Item)
@@ -88,7 +88,7 @@ func (f *fixture) listID(t *testing.T) string {
 func newClient() ourgrocer.Client {
 	cookieJar, _ := cookiejar.New(nil)
 	httpClient := http.Client{Jar: cookieJar}
-	return ourgrocer.NewClient(cookieJar, httpClient)
+	return ourgrocer.NewClient(cookieJar, &httpClient)
 }
 
 func newFixture(t *testing.T) fixture {

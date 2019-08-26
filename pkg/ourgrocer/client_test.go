@@ -3,6 +3,9 @@
 package ourgrocer_test
 
 import (
+	"io/ioutil"
+	"net/http"
+	"net/http/cookiejar"
 	"strings"
 	"testing"
 
@@ -44,4 +47,25 @@ func TestHandleGetList(t *testing.T) {
 	items, err := ourgrocer.HandleGetList(body, nil)
 	ok(t, err)
 	equals(t, items, []ourgrocer.Item{{ID: "VVbCucm4eT30FIW9ptejCr", Value: "celery", CategoryID: "ow7os337oMPoE2RnZPelRI"}, {ID: "irezU2ekUw34Sbk8YoNG3Q", Value: "cherries"}})
+}
+
+func TestLoginInvalidCredentials(t *testing.T) {
+	cookieJar, _ := cookiejar.New(nil)
+	httpClient := httpClientMock{}
+	httpClient.err = nil
+	httpClient.response = &http.Response{}
+	httpClient.response.Body = ioutil.NopCloser(strings.NewReader(""))
+	httpClient.response.StatusCode = http.StatusOK
+
+	client := ourgrocer.NewClient(cookieJar, &httpClient)
+	assert(t, client.Login("", "") != nil, "invalid credentials were accepted")
+}
+
+type httpClientMock struct {
+	response *http.Response
+	err      error
+}
+
+func (client *httpClientMock) Do(request *http.Request) (*http.Response, error) {
+	return client.response, client.err
 }
