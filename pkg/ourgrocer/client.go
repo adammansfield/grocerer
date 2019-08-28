@@ -109,7 +109,7 @@ func (client *Client) Login(email string, password string) error {
 		return fmt.Errorf("invalid credentials")
 	}
 
-	client.teamID, err = ExtractTeamID(response.Body)
+	client.teamID, err = extractTeamID(response.Body)
 	return err
 }
 
@@ -153,9 +153,8 @@ func buildLoginRequest(email string, password string) (*http.Request, error) {
 	return request, nil
 }
 
-// ExtractTeamID returns teamID from the response body of /sign-in.
-// TODO: make ExtractTeamID a private function
-func ExtractTeamID(r io.Reader) (string, error) {
+// extractTeamID returns teamID from the response body of /sign-in.
+func extractTeamID(r io.Reader) (string, error) {
 	bytes, err := ioutil.ReadAll(r)
 	if err != nil {
 		return "", err

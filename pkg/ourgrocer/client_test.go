@@ -6,19 +6,12 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
+	"net/url"
 	"strings"
 	"testing"
 
 	"github.com/adammansfield/grocerer/pkg/ourgrocer"
 )
-
-// TODO: modify test to only call Login (and still test teamID extraction)
-func TestExtractTeamId(t *testing.T) {
-	stream := strings.NewReader("var g_teamId = \"E0KAegvBF9SOQ78b9vhlYr\"")
-	teamID, err := ourgrocer.ExtractTeamID(stream)
-	ok(t, err)
-	equals(t, "E0KAegvBF9SOQ78b9vhlYr", teamID)
-}
 
 // TODO: modify test to only call GetList (and still test grocery list parsing)
 func TestHandleGetList(t *testing.T) {
@@ -49,18 +42,22 @@ func TestHandleGetList(t *testing.T) {
 	equals(t, items, []ourgrocer.Item{{ID: "VVbCucm4eT30FIW9ptejCr", Value: "celery", CategoryID: "ow7os337oMPoE2RnZPelRI"}, {ID: "irezU2ekUw34Sbk8YoNG3Q", Value: "cherries"}})
 }
 
-func TestLoginInvalidCredentials(t *testing.T) {
+func TestLogin(t *testing.T) {
 	cookieJar, _ := cookiejar.New(nil)
+	uri, _ := url.Parse("https://www.ourgroceries.com/sign-in")
+	cookieJar.SetCookies(uri, []*http.Cookie{{}})
+
 	httpClient := httpClientMock{}
 	httpClient.err = nil
 	httpClient.response = &http.Response{}
-	httpClient.response.Body = ioutil.NopCloser(strings.NewReader(""))
+	httpClient.response.Body = ioutil.NopCloser(strings.NewReader("var g_teamId = \"E0KAegvBF9SOQ78b9vhlYr\""))
 	httpClient.response.StatusCode = http.StatusOK
 
 	client := ourgrocer.NewClient(cookieJar, &httpClient)
-	assert(t, client.Login("", "") != nil, "invalid credentials were accepted")
+	ok(t, client.Login("email", "pass"))
 }
 
+// httpClientMock implements ourgrocer.HTTPClient.
 type httpClientMock struct {
 	response *http.Response
 	err      error
