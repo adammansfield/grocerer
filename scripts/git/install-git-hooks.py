@@ -10,16 +10,9 @@ def main():
     check_go()
     check_golint()
 
-    hooks_dir = get_hooks_dir()
-    pre_commit_link = hooks_dir / 'pre-commit'
-    pre_push_link = hooks_dir / 'pre-push'
-
-    scripts_dir = pathlib.Path(__file__).resolve().parent
-    pre_commit_script = scripts_dir / 'pre-commit.py'
-    pre_push_script = scripts_dir / 'pre-push.py'
-
-    symlink(pre_commit_link, pre_commit_script)
-    symlink(pre_push_link, pre_push_script)
+    link = get_hooks_dir() / 'pre-push'
+    script = pathlib.Path(__file__).resolve().parent / 'pre-push.py'
+    symlink(link, script)
 
 def check_go():
     if shutil.which("go") == None:
