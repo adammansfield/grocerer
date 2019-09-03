@@ -13,7 +13,7 @@ type getListResponse struct {
 	List list `json:"list"`
 }
 
-type getOverviewResponse struct {
+type getListsResponse struct {
 	ShoppingLists []ListID `json:"shoppingLists"`
 }
 

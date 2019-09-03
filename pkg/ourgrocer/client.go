@@ -188,7 +188,7 @@ func handleGetLists(bytes []byte, err error) ([]ListID, error) {
 		return nil, err
 	}
 
-	response := getOverviewResponse{}
+	response := getListsResponse{}
 	err = json.Unmarshal(bytes, &response)
 	if err != nil {
 		return nil, err

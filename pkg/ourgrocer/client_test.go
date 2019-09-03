@@ -42,18 +42,17 @@ func TestHandleGetList(t *testing.T) {
 	equals(t, items, []ourgrocer.Item{{ID: "VVbCucm4eT30FIW9ptejCr", Value: "celery", CategoryID: "ow7os337oMPoE2RnZPelRI"}, {ID: "irezU2ekUw34Sbk8YoNG3Q", Value: "cherries"}})
 }
 
+func TestGetLists(t *testing.T) {
+	client, httpClient := newMockClient()
+	httpClient.response.Body = ioutil.NopCloser(strings.NewReader("{\"shoppingLists\": [{\"name\": \"Groceries\"}]}"))
+	listIDs, err := client.GetLists()
+	ok(t, err)
+	equals(t, listIDs, []ourgrocer.ListID{{Name: "Groceries"}})
+}
+
 func TestLogin(t *testing.T) {
-	cookieJar, _ := cookiejar.New(nil)
-	uri, _ := url.Parse("https://www.ourgroceries.com/sign-in")
-	cookieJar.SetCookies(uri, []*http.Cookie{{}})
-
-	httpClient := httpClientMock{}
-	httpClient.err = nil
-	httpClient.response = &http.Response{}
+	client, httpClient := newMockClient()
 	httpClient.response.Body = ioutil.NopCloser(strings.NewReader("var g_teamId = \"E0KAegvBF9SOQ78b9vhlYr\""))
-	httpClient.response.StatusCode = http.StatusOK
-
-	client := ourgrocer.NewClient(cookieJar, &httpClient)
 	ok(t, client.Login("email", "pass"))
 }
 
@@ -65,4 +64,18 @@ type httpClientMock struct {
 
 func (client *httpClientMock) Do(request *http.Request) (*http.Response, error) {
 	return client.response, client.err
+}
+
+func newMockClient() (ourgrocer.Client, *httpClientMock) {
+	cookieJar, _ := cookiejar.New(nil)
+	uri, _ := url.Parse("https://www.ourgroceries.com/sign-in")
+	cookieJar.SetCookies(uri, []*http.Cookie{{}})
+
+	httpClient := &httpClientMock{}
+	httpClient.err = nil
+	httpClient.response = &http.Response{}
+	httpClient.response.StatusCode = http.StatusOK
+
+	client := ourgrocer.NewClient(cookieJar, httpClient)
+	return client, httpClient
 }
