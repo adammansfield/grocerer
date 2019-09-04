@@ -42,8 +42,13 @@ func TestHandleGetList(t *testing.T) {
 	equals(t, items, []ourgrocer.Item{{ID: "VVbCucm4eT30FIW9ptejCr", Value: "celery", CategoryID: "ow7os337oMPoE2RnZPelRI"}, {ID: "irezU2ekUw34Sbk8YoNG3Q", Value: "cherries"}})
 }
 
+func TestAddItem(t *testing.T) {
+	client, _, _ := newClientWithStubs()
+	ok(t, client.AddItem("n8w1aAoqqURBrM2nUns6nQ", "grapes"))
+}
+
 func TestGetLists(t *testing.T) {
-	client, httpClient := newMockClient()
+	client, httpClient, _ := newClientWithStubs()
 	httpClient.response.Body = ioutil.NopCloser(strings.NewReader("{\"shoppingLists\": [{\"name\": \"Groceries\"}]}"))
 	listIDs, err := client.GetLists()
 	ok(t, err)
@@ -51,31 +56,44 @@ func TestGetLists(t *testing.T) {
 }
 
 func TestLogin(t *testing.T) {
-	client, httpClient := newMockClient()
+	client, httpClient, _ := newClientWithStubs()
 	httpClient.response.Body = ioutil.NopCloser(strings.NewReader("var g_teamId = \"E0KAegvBF9SOQ78b9vhlYr\""))
 	ok(t, client.Login("email", "pass"))
 }
 
-// httpClientMock implements ourgrocer.HTTPClient.
-type httpClientMock struct {
+func TestLoginCannotParseTeamID(t *testing.T) {
+	client, _, _ := newClientWithStubs()
+	assert(t, client.Login("email", "pass") != nil, "Invalid response body parsed")
+}
+
+func TestLoginInvalidCredentials(t *testing.T) {
+	client, _, jar := newClientWithStubs()
+	uri, _ := url.Parse("https://www.ourgroceries.com/sign-in")
+	jar.SetCookies(uri, nil)
+	assert(t, client.Login("email", "pass") != nil, "Invalid login accepted")
+}
+
+// httpClientStub implements ourgrocer.HTTPClient.
+type httpClientStub struct {
 	response *http.Response
 	err      error
 }
 
-func (client *httpClientMock) Do(request *http.Request) (*http.Response, error) {
+func (client *httpClientStub) Do(request *http.Request) (*http.Response, error) {
 	return client.response, client.err
 }
 
-func newMockClient() (ourgrocer.Client, *httpClientMock) {
-	cookieJar, _ := cookiejar.New(nil)
+func newClientWithStubs() (ourgrocer.Client, *httpClientStub, *cookiejar.Jar) {
+	jar, _ := cookiejar.New(nil)
 	uri, _ := url.Parse("https://www.ourgroceries.com/sign-in")
-	cookieJar.SetCookies(uri, []*http.Cookie{{}})
+	jar.SetCookies(uri, []*http.Cookie{{Name: "ourgroceries-auth", Value: "JbwTzQVF2ucvn0kufJE6Oc|16fe2ba873ce5879c934137a869568004fdd8ceabf32963b182437072214a8ee"}})
 
-	httpClient := &httpClientMock{}
+	httpClient := &httpClientStub{}
 	httpClient.err = nil
 	httpClient.response = &http.Response{}
+	httpClient.response.Body = ioutil.NopCloser(strings.NewReader(""))
 	httpClient.response.StatusCode = http.StatusOK
 
-	client := ourgrocer.NewClient(cookieJar, httpClient)
-	return client, httpClient
+	client := ourgrocer.NewClient(jar, httpClient)
+	return client, httpClient, jar
 }
