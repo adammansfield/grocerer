@@ -47,6 +47,14 @@ func TestAddItem(t *testing.T) {
 	ok(t, client.AddItem("n8w1aAoqqURBrM2nUns6nQ", "grapes"))
 }
 
+func TestGetList(t *testing.T) {
+	client, httpClient, _ := newClientWithStubs()
+	httpClient.response.Body = ioutil.NopCloser(strings.NewReader("{\"list\":{\"items\":[{\"value\":\"Apples\"},{\"value\":\"Grapes\"}]}}"))
+	items, err := client.GetList("n8w1aAoqqURBrM2nUns6nQ")
+	ok(t, err)
+	equals(t, items, []ourgrocer.Item{{Value: "Apples"}, {Value: "Grapes"}})
+}
+
 func TestGetLists(t *testing.T) {
 	client, httpClient, _ := newClientWithStubs()
 	httpClient.response.Body = ioutil.NopCloser(strings.NewReader("{\"shoppingLists\": [{\"name\": \"Groceries\"}]}"))
